@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
+import { Product } from "./product";
 
 function App() {
-  const [products, setProducts] = useState([
-    { id: 1, name: "Product 1", price: 100 },
-    { id: 2, name: "Product 2", price: 200 },
-  ]);
+  const [products, setProducts] = useState<Product[]>([]);
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
       .then((res) => res.json())
       .then((data) => setProducts(data));
-  }
-  , []);
+  }, []);
   function addProduct() {
-    setProducts([
-      ...products,
+    setProducts((prevState) => [
+      ...prevState,
       {
-        id: products.length + 1,
+        id: prevState.length + 101,
         name: `Product ${products.length + 1}`,
         price: (products.length + 1) * 100,
+        brand: "Brand",
+        description: "Description",
+        pictureUrl: "http://picsum.photos/200",
       },
     ]);
   }
@@ -25,9 +25,9 @@ function App() {
     <div>
       <h1>NoteLinkerAl</h1>
       <ul>
-        {products.map((item, index) => (
-          <li key={index}>
-            {item.name} - {item.price}
+        {products.map((product) => (
+          <li key={product.id}>
+            {product.name} - {product.price}
           </li>
         ))}
       </ul>
