@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<StoreContext>(opt => 
+builder.Services.AddDbContext<NotesAppContext>(opt => 
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 }
@@ -35,7 +35,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 var scope = app.Services.CreateScope();
-var context = scope.ServiceProvider.GetRequiredService<StoreContext>();
+var context = scope.ServiceProvider.GetRequiredService<NotesAppContext>();
 var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 try
 {

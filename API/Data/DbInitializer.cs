@@ -1,221 +1,117 @@
 using API.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
     public static class DbInitializer
     {
-        public static void Initialize(StoreContext context)
+        public static void Initialize(NotesAppContext context)
         {
-            if(context.Products.Any())
+            context.Database.EnsureCreated();
+
+            // Check if there is already data
+            if (context.Users.Any() || context.Cards.Any() || context.Inboxes.Any() || context.CardBoxes.Any() || context.NoteBooks.Any() || context.Tags.Any())
             {
                 return;
             }
-            var Products = new List<Product>
-            {
-                new Product
-                {
-                    Name = "Angular Speedster Board 2000",
-                    Description =
-                        "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 20000,
-                    PictureUrl = "/images/products/sb-ang1.png",
-                    Brand = "Angular",
-                    Type = "Boards",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Green Angular Board 3000",
-                    Description = "Nunc viverra imperdiet enim. Fusce est. Vivamus a tellus.",
-                    Price = 15000,
-                    PictureUrl = "/images/products/sb-ang2.png",
-                    Brand = "Angular",
-                    Type = "Boards",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Core Board Speed Rush 3",
-                    Description =
-                        "Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Mauris eget neque at sem venenatis eleifend. Ut nonummy.",
-                    Price = 18000,
-                    PictureUrl = "/images/products/sb-core1.png",
-                    Brand = "NetCore",
-                    Type = "Boards",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Net Core Super Board",
-                    Description =
-                        "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin pharetra nonummy pede. Mauris et orci.",
-                    Price = 30000,
-                    PictureUrl = "/images/products/sb-core2.png",
-                    Brand = "NetCore",
-                    Type = "Boards",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "React Board Super Whizzy Fast",
-                    Description =
-                        "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 25000,
-                    PictureUrl = "/images/products/sb-react1.png",
-                    Brand = "React",
-                    Type = "Boards",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Typescript Entry Board",
-                    Description =
-                        "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 12000,
-                    PictureUrl = "/images/products/sb-ts1.png",
-                    Brand = "TypeScript",
-                    Type = "Boards",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Core Blue Hat",
-                    Description =
-                        "Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 1000,
-                    PictureUrl = "/images/products/hat-core1.png",
-                    Brand = "NetCore",
-                    Type = "Hats",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Green React Woolen Hat",
-                    Description =
-                        "Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 8000,
-                    PictureUrl = "/images/products/hat-react1.png",
-                    Brand = "React",
-                    Type = "Hats",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Purple React Woolen Hat",
-                    Description =
-                        "Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 1500,
-                    PictureUrl = "/images/products/hat-react2.png",
-                    Brand = "React",
-                    Type = "Hats",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Blue Code Gloves",
-                    Description =
-                        "Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 1800,
-                    PictureUrl = "/images/products/glove-code1.png",
-                    Brand = "VS Code",
-                    Type = "Gloves",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Green Code Gloves",
-                    Description =
-                        "Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 1500,
-                    PictureUrl = "/images/products/glove-code2.png",
-                    Brand = "VS Code",
-                    Type = "Gloves",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Purple React Gloves",
-                    Description =
-                        "Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 1600,
-                    PictureUrl = "/images/products/glove-react1.png",
-                    Brand = "React",
-                    Type = "Gloves",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Green React Gloves",
-                    Description =
-                        "Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 1400,
-                    PictureUrl = "/images/products/glove-react2.png",
-                    Brand = "React",
-                    Type = "Gloves",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Redis Red Boots",
-                    Description =
-                        "Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Mauris eget neque at sem venenatis eleifend. Ut nonummy.",
-                    Price = 25000,
-                    PictureUrl = "/images/products/boot-redis1.png",
-                    Brand = "Redis",
-                    Type = "Boots",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Core Red Boots",
-                    Description =
-                        "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 18999,
-                    PictureUrl = "/images/products/boot-core2.png",
-                    Brand = "NetCore",
-                    Type = "Boots",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Core Purple Boots",
-                    Description =
-                        "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin pharetra nonummy pede. Mauris et orci.",
-                    Price = 19999,
-                    PictureUrl = "/images/products/boot-core1.png",
-                    Brand = "NetCore",
-                    Type = "Boots",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Angular Purple Boots",
-                    Description = "Aenean nec lorem. In porttitor. Donec laoreet nonummy augue.",
-                    Price = 15000,
-                    PictureUrl = "/images/products/boot-ang2.png",
-                    Brand = "Angular",
-                    Type = "Boots",
-                    QuantityInStock = 100
-                },
-                new Product
-                {
-                    Name = "Angular Blue Boots",
-                    Description =
-                        "Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Mauris eget neque at sem venenatis eleifend. Ut nonummy.",
-                    Price = 18000,
-                    PictureUrl = "/images/products/boot-ang1.png",
-                    Brand = "Angular",
-                    Type = "Boots",
-                    QuantityInStock = 100
-                },
-            };
-            // context.Products.AddRange(Products);
-            foreach (var product in Products)
-            {
-                context.Products.Add(product);
-            }
 
+            var users = new List<User>
+            {
+                new User
+                {
+                    UserName = "john_doe",
+                    Email = "john@example.com",
+                    Password = "password123",
+                    AccountType = "standard",
+                    AvatarUrl = "https://api.dicebear.com/9.x/shapes/svg"
+                },
+                new User
+                {
+                    UserName = "jane_doe",
+                    Email = "jane@example.com",
+                    Password = "password456",
+                    AccountType = "premium",
+                    AvatarUrl = "https://api.dicebear.com/9.x/shapes/svg"
+                }
+            };
+            context.Users.AddRange(users);
             context.SaveChanges();
-        } 
+
+            var inboxes = new List<Inbox>
+            {
+                new Inbox(),
+                new Inbox()
+            };
+            context.Inboxes.AddRange(inboxes);
+            context.SaveChanges();
+
+            var cardBoxes = new List<CardBox>
+            {
+                new CardBox { CardBoxName = "Math" },
+                new CardBox { CardBoxName = "Science" }
+            };
+            context.CardBoxes.AddRange(cardBoxes);
+            context.SaveChanges();
+
+            var notebooks = new List<NoteBook>
+            {
+                new NoteBook { NoteBookName = "Algebra" },
+                new NoteBook { NoteBookName = "Physics" }
+            };
+            context.NoteBooks.AddRange(notebooks);
+            context.SaveChanges();
+
+            var tags = new List<Tag>
+            {
+                new Tag { TagName = "Important" },
+                new Tag { TagName = "Review" }
+            };
+            context.Tags.AddRange(tags);
+            context.SaveChanges();
+
+            var cards = new List<Card>
+            {
+                new Card { Content = "What is 2+2?", UserId = users[0].UserId, InboxId = inboxes[0].InboxId, CardBoxId = cardBoxes[0].CardBoxId },
+                new Card { Content = "What is the formula for force?", UserId = users[1].UserId, InboxId = inboxes[1].InboxId, CardBoxId = cardBoxes[1].CardBoxId }
+            };
+            context.Cards.AddRange(cards);
+            context.SaveChanges();
+
+            var cardNoteBookLinks = new List<CardNoteBookLink>
+            {
+                new CardNoteBookLink { CardId = cards[0].CardId, NoteBookId = notebooks[0].NoteBookId },
+                new CardNoteBookLink { CardId = cards[1].CardId, NoteBookId = notebooks[1].NoteBookId }
+            };
+            context.CardNoteBookLinks.AddRange(cardNoteBookLinks);
+            context.SaveChanges();
+
+            var cardTags = new List<CardTag>
+            {
+                new CardTag { CardId = cards[0].CardId, TagId = tags[0].TagId },
+                new CardTag { CardId = cards[1].CardId, TagId = tags[1].TagId }
+            };
+            context.CardTags.AddRange(cardTags);
+            context.SaveChanges();
+
+            var resources = new List<Resource>
+            {
+                new Resource
+                {
+                    ResourceName = "Algebra Basics",
+                    Content = "Content for Algebra Basics",
+                    Summary = "Summary for Algebra Basics",
+                    CardBookLinks = new List<CardNoteBookLink> { cardNoteBookLinks[0] }
+                },
+                new Resource
+                {
+                    ResourceName = "Physics Introduction",
+                    Content = "Content for Physics Introduction",
+                    Summary = "Summary for Physics Introduction",
+                    CardBookLinks = new List<CardNoteBookLink> { cardNoteBookLinks[1] }
+                }
+            };
+            context.Resources.AddRange(resources);
+            context.SaveChanges();
+        }
     }
 }
