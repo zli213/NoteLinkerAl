@@ -10,7 +10,6 @@ namespace API.Data
         }
         public DbSet<User> Users { get; set; }
         public DbSet<Card> Cards { get; set; }
-        public DbSet<Inbox> Inboxes { get; set; }
         public DbSet<CardBox> CardBoxes { get; set; }
         public DbSet<NoteBook> NoteBooks { get; set; }
         public DbSet<CardNoteBookLink> CardNoteBookLinks { get; set; }
@@ -24,7 +23,9 @@ namespace API.Data
 
             modelBuilder.Entity<CardTag>()
                 .HasKey(ct => new { ct.CardId, ct.TagId });
-
+            modelBuilder.Entity<Card>()
+                .Property(c => c.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
             base.OnModelCreating(modelBuilder);
         }
     }
