@@ -1,5 +1,5 @@
 using API.Entities;
-using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace API.Data
 {
@@ -9,8 +9,7 @@ namespace API.Data
         {
             context.Database.EnsureCreated();
 
-            // Check if there is already data
-            if (context.Users.Any() || context.Cards.Any() || context.Inboxes.Any() || context.CardBoxes.Any() || context.NoteBooks.Any() || context.Tags.Any())
+            if (context.Users.Any() || context.Cards.Any() || context.CardBoxes.Any() || context.NoteBooks.Any() || context.Tags.Any() || context.Resources.Any())
             {
                 return;
             }
@@ -23,7 +22,7 @@ namespace API.Data
                     Email = "john@example.com",
                     Password = "password123",
                     AccountType = "standard",
-                    AvatarUrl = "https://api.dicebear.com/9.x/shapes/svg"
+                    AvatarUrl = "/images/avatars/john_doe.png"
                 },
                 new User
                 {
@@ -31,18 +30,10 @@ namespace API.Data
                     Email = "jane@example.com",
                     Password = "password456",
                     AccountType = "premium",
-                    AvatarUrl = "https://api.dicebear.com/9.x/shapes/svg"
+                    AvatarUrl = "/images/avatars/jane_doe.png"
                 }
             };
             context.Users.AddRange(users);
-            context.SaveChanges();
-
-            var inboxes = new List<Inbox>
-            {
-                new Inbox(),
-                new Inbox()
-            };
-            context.Inboxes.AddRange(inboxes);
             context.SaveChanges();
 
             var cardBoxes = new List<CardBox>
@@ -64,15 +55,16 @@ namespace API.Data
             var tags = new List<Tag>
             {
                 new Tag { TagName = "Important" },
-                new Tag { TagName = "Review" }
+                new Tag { TagName = "Review" },
+                new Tag { TagName = "Inbox" }  // Inbox tag
             };
             context.Tags.AddRange(tags);
             context.SaveChanges();
 
             var cards = new List<Card>
             {
-                new Card { Content = "What is 2+2?", UserId = users[0].UserId, InboxId = inboxes[0].InboxId, CardBoxId = cardBoxes[0].CardBoxId },
-                new Card { Content = "What is the formula for force?", UserId = users[1].UserId, InboxId = inboxes[1].InboxId, CardBoxId = cardBoxes[1].CardBoxId }
+                new Card { Content = "What is 2+2?", UserId = users[0].UserId, CardBoxId = cardBoxes[0].CardBoxId, CreatedAt = DateTime.UtcNow},
+                new Card { Content = "What is the formula for force?", UserId = users[1].UserId, CardBoxId = cardBoxes[1].CardBoxId, CreatedAt = DateTime.UtcNow}
             };
             context.Cards.AddRange(cards);
             context.SaveChanges();
@@ -87,6 +79,7 @@ namespace API.Data
 
             var cardTags = new List<CardTag>
             {
+                new CardTag { CardId = cards[0].CardId, TagId = tags[2].TagId }, // Inbox tag
                 new CardTag { CardId = cards[0].CardId, TagId = tags[0].TagId },
                 new CardTag { CardId = cards[1].CardId, TagId = tags[1].TagId }
             };

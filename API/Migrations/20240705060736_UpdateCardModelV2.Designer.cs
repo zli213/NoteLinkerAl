@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(NotesAppContext))]
-    [Migration("20240704054725_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240705060736_UpdateCardModelV2")]
+    partial class UpdateCardModelV2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,10 +30,11 @@ namespace API.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("InboxId")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
@@ -41,8 +42,6 @@ namespace API.Migrations
                     b.HasKey("CardId");
 
                     b.HasIndex("CardBoxId");
-
-                    b.HasIndex("InboxId");
 
                     b.HasIndex("UserId");
 
@@ -56,6 +55,7 @@ namespace API.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("CardBoxName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("CardBoxId");
@@ -98,17 +98,6 @@ namespace API.Migrations
                     b.ToTable("CardTags");
                 });
 
-            modelBuilder.Entity("API.Entities.Inbox", b =>
-                {
-                    b.Property<int>("InboxId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("InboxId");
-
-                    b.ToTable("Inboxes");
-                });
-
             modelBuilder.Entity("API.Entities.NoteBook", b =>
                 {
                     b.Property<int>("NoteBookId")
@@ -116,6 +105,7 @@ namespace API.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("NoteBookName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("NoteBookId");
@@ -130,15 +120,18 @@ namespace API.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("NoteBookId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ResourceName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Summary")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("ResourceId");
@@ -155,6 +148,7 @@ namespace API.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("TagName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("TagId");
@@ -198,10 +192,6 @@ namespace API.Migrations
                         .WithMany("Cards")
                         .HasForeignKey("CardBoxId");
 
-                    b.HasOne("API.Entities.Inbox", "Inbox")
-                        .WithMany("Cards")
-                        .HasForeignKey("InboxId");
-
                     b.HasOne("API.Entities.User", "User")
                         .WithMany("Cards")
                         .HasForeignKey("UserId")
@@ -209,8 +199,6 @@ namespace API.Migrations
                         .IsRequired();
 
                     b.Navigation("CardBox");
-
-                    b.Navigation("Inbox");
 
                     b.Navigation("User");
                 });
@@ -272,11 +260,6 @@ namespace API.Migrations
                 });
 
             modelBuilder.Entity("API.Entities.CardBox", b =>
-                {
-                    b.Navigation("Cards");
-                });
-
-            modelBuilder.Entity("API.Entities.Inbox", b =>
                 {
                     b.Navigation("Cards");
                 });

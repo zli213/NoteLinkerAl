@@ -16,23 +16,11 @@ namespace API.Migrations
                 {
                     CardBoxId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CardBoxName = table.Column<string>(type: "TEXT", nullable: true)
+                    CardBoxName = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CardBoxes", x => x.CardBoxId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Inboxes",
-                columns: table => new
-                {
-                    InboxId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Inboxes", x => x.InboxId);
                 });
 
             migrationBuilder.CreateTable(
@@ -41,7 +29,7 @@ namespace API.Migrations
                 {
                     NoteBookId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    NoteBookName = table.Column<string>(type: "TEXT", nullable: true)
+                    NoteBookName = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,7 +42,7 @@ namespace API.Migrations
                 {
                     TagId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TagName = table.Column<string>(type: "TEXT", nullable: true)
+                    TagName = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -84,9 +72,9 @@ namespace API.Migrations
                 {
                     ResourceId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ResourceName = table.Column<string>(type: "TEXT", nullable: true),
-                    Content = table.Column<string>(type: "TEXT", nullable: true),
-                    Summary = table.Column<string>(type: "TEXT", nullable: true),
+                    ResourceName = table.Column<string>(type: "TEXT", nullable: false),
+                    Content = table.Column<string>(type: "TEXT", nullable: false),
+                    Summary = table.Column<string>(type: "TEXT", nullable: false),
                     NoteBookId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
@@ -105,9 +93,8 @@ namespace API.Migrations
                 {
                     CardId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Content = table.Column<string>(type: "TEXT", nullable: true),
+                    Content = table.Column<string>(type: "TEXT", nullable: false),
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    InboxId = table.Column<int>(type: "INTEGER", nullable: true),
                     CardBoxId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
@@ -118,11 +105,6 @@ namespace API.Migrations
                         column: x => x.CardBoxId,
                         principalTable: "CardBoxes",
                         principalColumn: "CardBoxId");
-                    table.ForeignKey(
-                        name: "FK_Cards_Inboxes_InboxId",
-                        column: x => x.InboxId,
-                        principalTable: "Inboxes",
-                        principalColumn: "InboxId");
                     table.ForeignKey(
                         name: "FK_Cards_Users_UserId",
                         column: x => x.UserId,
@@ -201,11 +183,6 @@ namespace API.Migrations
                 column: "CardBoxId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Cards_InboxId",
-                table: "Cards",
-                column: "InboxId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Cards_UserId",
                 table: "Cards",
                 column: "UserId");
@@ -244,9 +221,6 @@ namespace API.Migrations
 
             migrationBuilder.DropTable(
                 name: "CardBoxes");
-
-            migrationBuilder.DropTable(
-                name: "Inboxes");
 
             migrationBuilder.DropTable(
                 name: "Users");
