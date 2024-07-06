@@ -3,6 +3,7 @@
 // import Catalog from "../../features/catalog/Catalog";
 import { ThemeProvider } from "../../components/ThemeContext";
 import Sidebar from "../../components/Sidebar";
+import CardStack from "../../components/CardStack";
 
 function App() {
   // const [products, setProducts] = useState<Product[]>([]);
@@ -28,6 +29,7 @@ function App() {
     <ThemeProvider>
       <div className="flex">
         <Sidebar />
+        <CardStack />
       </div>
     </ThemeProvider>
   );
