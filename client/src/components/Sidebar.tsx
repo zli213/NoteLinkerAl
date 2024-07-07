@@ -40,7 +40,6 @@ const Sidebar = () => {
               : "bg-zinc-200 text-black  hover:bg-zinc-300"
           }`}
         >
-          {" "}
           + New Thread
         </button>
       </div>

@@ -4,6 +4,8 @@
 import { ThemeProvider } from "../../components/ThemeContext";
 import Sidebar from "../../components/Sidebar";
 import Inbox from "../../features/inbox/Inbox";
+import NotesPage from "../../features/notes/NotesPage";
+import Notebooks from "../../features/notebooks/Notebooks";
 function App() {
   // const [products, setProducts] = useState<Product[]>([]);
   // useEffect(() => {
@@ -26,9 +28,13 @@ function App() {
   // }
   return (
     <ThemeProvider>
-      <div className="flex h-screen">
-        <Sidebar/>
-        <Inbox />
+      <div className="flex h-screen justify-between">
+        <Sidebar />
+        {/* <Inbox /> */}
+        {/* <NotesPage /> */}
+        <div className="flex-grow">
+          <Notebooks />
+        </div>
       </div>
     </ThemeProvider>
   );

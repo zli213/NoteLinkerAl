@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-
+import LoginModal from "./LoginModal";
 const CustomModal = ({ name }: { name: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef(null);
@@ -43,10 +43,12 @@ const CustomModal = ({ name }: { name: string }) => {
         {name}
       </button>
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div ref={modalRef} className="bg-white p-6 rounded-lg shadow-xl">
-            <h3 className="font-bold text-lg">Hello!</h3>
-            <p className="py-4">Press ESC key or click outside to close</p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center Z-50">
+          <div
+            ref={modalRef}
+            className="bg-white p-6 rounded-lg shadow-xl z-60"
+          >
+            <LoginModal />
           </div>
         </div>
       )}
