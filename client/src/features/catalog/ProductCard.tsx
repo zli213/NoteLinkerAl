@@ -1,4 +1,3 @@
-import { Avatar, ListItem, ListItemAvatar, ListItemText } from "@mui/material";
 import { Product } from "../../app/models/product";
 interface Props {
   product: Product;
@@ -6,14 +5,11 @@ interface Props {
 
 const ProductCard = ({ product }: Props) => {
   return (
-    <ListItem key={product.id}>
-      <ListItemAvatar>
-        <Avatar src={product.pictureUrl} />
-      </ListItemAvatar>
-      <ListItemText>
-        {product.name} - {product.price}
-      </ListItemText>
-    </ListItem>
+    <div>
+      <h1>{product.name}</h1>
+      <h2>{product.price}</h2>
+      <img src={product.pictureUrl} alt={product.name} />
+    </div>
   );
 };
 
