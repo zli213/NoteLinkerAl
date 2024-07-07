@@ -3,8 +3,7 @@
 // import Catalog from "../../features/catalog/Catalog";
 import { ThemeProvider } from "../../components/ThemeContext";
 import Sidebar from "../../components/Sidebar";
-import CardStack from "../../components/CardStack";
-
+import Inbox from "../../features/inbox/Inbox";
 function App() {
   // const [products, setProducts] = useState<Product[]>([]);
   // useEffect(() => {
@@ -27,9 +26,9 @@ function App() {
   // }
   return (
     <ThemeProvider>
-      <div className="flex">
-        <Sidebar />
-        <CardStack />
+      <div className="flex h-screen">
+        <Sidebar/>
+        <Inbox />
       </div>
     </ThemeProvider>
   );
