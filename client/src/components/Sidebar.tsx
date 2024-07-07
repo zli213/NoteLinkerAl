@@ -12,6 +12,7 @@ import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "./ThemeContext";
 import WebHead from "./WebHead";
 import CustomModal from "./CustomModal";
+import UserInfo from "./UserInfo";
 
 const Sidebar = () => {
   const { theme } = useTheme();
@@ -24,6 +25,7 @@ const Sidebar = () => {
       <div className="mb-8">
         <WebHead />
       </div>
+      <UserInfo />
       <div className="mb-4">
         {/* <button className=" w-full bg-blue-500 text-white py-2 px-4 rounded hover:text-gray-900 p-2 transition-colors duration-150 ease-in-out hover:bg-blue-600">
           Sign In
