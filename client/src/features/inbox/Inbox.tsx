@@ -1,6 +1,5 @@
 import CardStack from "../../components/CardStack";
 import TimeLine from "../../components/TimeLine";
-import RichTextEditor from "../../components/RichTextEditor";
 import Editor from "../../components/Editor";
 export default function Inbox() {
   return (
@@ -15,7 +14,6 @@ export default function Inbox() {
           </div>
         </div>
       </div>
-      {/* <RichTextEditor /> */}
       <Editor />
     </div>
   );

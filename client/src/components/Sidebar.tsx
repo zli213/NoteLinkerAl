@@ -13,6 +13,8 @@ import { useTheme } from "./ThemeContext";
 import WebHead from "./WebHead";
 import CustomModal from "./CustomModal";
 import UserInfo from "./UserInfo";
+import { NavLink } from "react-router-dom";
+import LoginModal from "./LoginModal";
 
 const Sidebar = () => {
   const { theme } = useTheme();
@@ -30,7 +32,9 @@ const Sidebar = () => {
         {/* <button className=" w-full bg-blue-500 text-white py-2 px-4 rounded hover:text-gray-900 p-2 transition-colors duration-150 ease-in-out hover:bg-blue-600">
           Sign In
         </button> */}
-        <CustomModal name={"Sign in"} />
+        <CustomModal name="Sign in">
+          <LoginModal />
+        </CustomModal>{" "}
       </div>
       <div className="mb-4">
         <button
@@ -61,8 +65,8 @@ const Sidebar = () => {
           </li>
           {/* Add inbox */}
           <li className="mb-2">
-            <a
-              href="#"
+            <NavLink
+              to="/inbox"
               className={`flex items-center p-2 rounded ${
                 theme === "dark"
                   ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
@@ -71,12 +75,12 @@ const Sidebar = () => {
             >
               <Inbox className="mr-2" size={20} />
               Inbox
-            </a>
+            </NavLink>
           </li>
           {/* Add notes */}
           <li className="mb-2">
-            <a
-              href="#"
+            <NavLink
+              to="/notes"
               className={`flex items-center p-2 rounded ${
                 theme === "dark"
                   ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
@@ -85,11 +89,11 @@ const Sidebar = () => {
             >
               <StickyNote className="mr-2" size={20} />
               Notes
-            </a>
+            </NavLink>
           </li>
           <li className="mb-2">
-            <a
-              href="#"
+            <NavLink
+              to="/notebooks"
               className={`flex items-center p-2 rounded ${
                 theme === "dark"
                   ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
@@ -98,11 +102,11 @@ const Sidebar = () => {
             >
               <NotebookTabs className="mr-2" size={20} />
               Notebooks
-            </a>
+            </NavLink>
           </li>
           <li className="mb-2">
-            <a
-              href="#"
+            <NavLink
+              to="/trash"
               className={`flex items-center p-2 rounded ${
                 theme === "dark"
                   ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
@@ -111,11 +115,11 @@ const Sidebar = () => {
             >
               <Trash2 className="mr-2" size={20} />
               Trash
-            </a>
+            </NavLink>
           </li>
           <li className="mb-2">
-            <a
-              href="#"
+            <NavLink
+              to="/history"
               className={`flex items-center p-2 rounded ${
                 theme === "dark"
                   ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
@@ -124,7 +128,7 @@ const Sidebar = () => {
             >
               <Clock className="mr-2" size={20} />
               History
-            </a>
+            </NavLink>
           </li>
           {/* Add more menu items as needed */}
         </ul>
