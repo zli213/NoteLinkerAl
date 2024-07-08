@@ -4,7 +4,7 @@ const Card = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const toggleExpand = () => setIsExpanded(!isExpanded);
   return (
-    <div className="card bg-base-200 w-96 shadow-xl -z-40">
+    <div className="card bg-base-200 w-96 shadow-xl -z-0">
       {/* <figure>
         <img
           src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
