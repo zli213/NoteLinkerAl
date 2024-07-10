@@ -1,40 +1,56 @@
 using API.Entities;
+using Microsoft.AspNetCore.Identity;
 using System.Linq;
+using System.Collections.Generic;
+using System;
+using System.Threading.Tasks;
 
 namespace API.Data
 {
     public static class DbInitializer
     {
-        public static void Initialize(NotesAppContext context)
+        public static async Task Initialize(NotesAppContext context, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             context.Database.EnsureCreated();
 
-            if (context.Users.Any() || context.Cards.Any() || context.CardBoxes.Any() || context.NoteBooks.Any() || context.Tags.Any() || context.Resources.Any())
+            // Ensure roles are created
+            if (!await roleManager.RoleExistsAsync("Admin"))
             {
-                return;
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+            }
+            if (!await roleManager.RoleExistsAsync("Member"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Member"));
             }
 
-            var users = new List<User>
+            // Check if any users exist
+            if (!userManager.Users.Any())
             {
-                new User
+                var user = new User
                 {
                     UserName = "john_doe",
-                    Email = "john@example.com",
-                    Password = "password123",
+                    Email = "john@test.com",
                     AccountType = "standard",
                     AvatarUrl = "/images/avatars/john_doe.png"
-                },
-                new User
+                };
+                await userManager.CreateAsync(user, "password123");
+                await userManager.AddToRoleAsync(user, "Member");
+
+                var admin = new User
                 {
                     UserName = "jane_doe",
-                    Email = "jane@example.com",
-                    Password = "password456",
+                    Email = "jane@test.com",
                     AccountType = "premium",
                     AvatarUrl = "/images/avatars/jane_doe.png"
-                }
-            };
-            context.Users.AddRange(users);
-            context.SaveChanges();
+                };
+                await userManager.CreateAsync(admin, "password456");
+                await userManager.AddToRolesAsync(admin, new[] { "Member", "Admin" });
+            }
+
+            if (context.CardBoxes.Any() || context.NoteBooks.Any() || context.Tags.Any() || context.Cards.Any() || context.Resources.Any())
+            {
+                return; // DB has been seeded
+            }
 
             var cardBoxes = new List<CardBox>
             {
@@ -56,15 +72,40 @@ namespace API.Data
             {
                 new Tag { TagName = "Important" },
                 new Tag { TagName = "Review" },
-                new Tag { TagName = "Inbox" }  // Inbox tag
+                new Tag { TagName = "Inbox" }
             };
             context.Tags.AddRange(tags);
             context.SaveChanges();
 
+            // Retrieve user IDs and handle possible null references
+            var johnDoe = await userManager.FindByNameAsync("john_doe");
+            var janeDoe = await userManager.FindByNameAsync("jane_doe");
+
+            if (johnDoe == null || janeDoe == null)
+            {
+                throw new Exception("Seeding error: Required users not found.");
+            }
+
             var cards = new List<Card>
             {
-                new Card { Content = "What is 2+2?", UserId = users[0].UserId, CardBoxId = cardBoxes[0].CardBoxId, CreatedAt = DateTime.UtcNow},
-                new Card { Content = "What is the formula for force?", UserId = users[1].UserId, CardBoxId = cardBoxes[1].CardBoxId, CreatedAt = DateTime.UtcNow}
+                new Card 
+                { 
+                    Content = "What is 2+2?", 
+                    UserId = johnDoe.Id, 
+                    CardBoxId = cardBoxes[0].CardBoxId, 
+                    CreatedAt = DateTime.UtcNow, 
+                    User = johnDoe, 
+                    CardBox = cardBoxes[0]
+                },
+                new Card 
+                { 
+                    Content = "What is the formula for force?", 
+                    UserId = janeDoe.Id, 
+                    CardBoxId = cardBoxes[1].CardBoxId, 
+                    CreatedAt = DateTime.UtcNow, 
+                    User = janeDoe, 
+                    CardBox = cardBoxes[1]
+                }
             };
             context.Cards.AddRange(cards);
             context.SaveChanges();

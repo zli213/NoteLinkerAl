@@ -1,14 +1,15 @@
 using API.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class NotesAppContext: DbContext
+    public class NotesAppContext: IdentityDbContext<User>
     {
         public NotesAppContext(DbContextOptions<NotesAppContext> options) : base(options)
         {
         }
-        public DbSet<User> Users { get; set; }
         public DbSet<Card> Cards { get; set; }
         public DbSet<CardBox> CardBoxes { get; set; }
         public DbSet<NoteBook> NoteBooks { get; set; }
@@ -27,6 +28,10 @@ namespace API.Data
                 .Property(c => c.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole { Name = "Admin", NormalizedName = "ADMIN" },
+                new IdentityRole { Name = "Member", NormalizedName = "MEMBER" }
+            ); 
         }
     }
 }
