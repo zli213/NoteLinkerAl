@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(NotesAppContext))]
-    [Migration("20240710115839_IdentityAdded")]
-    partial class IdentityAdded
+    [Migration("20240712111327_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -178,6 +178,9 @@ namespace API.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Roles")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
 
@@ -259,13 +262,13 @@ namespace API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "717e5175-da0f-41ad-bb88-98b97b78f556",
+                            Id = "d11dadc1-5dda-45f4-baeb-8e8685094001",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "9f5f3219-b746-4595-a1b8-a908a0425711",
+                            Id = "77ee2934-7205-4a0b-a1b0-51e240499367",
                             Name = "Member",
                             NormalizedName = "MEMBER"
                         });

@@ -7,6 +7,17 @@ const UserInfo = () => {
 
   const openProfile = () => setIsProfileOpen(true);
   const closeProfile = () => setIsProfileOpen(false);
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("email");
+    localStorage.removeItem("accountType");
+    localStorage.removeItem("avatarUrl");
+    localStorage.removeItem("roles");
+
+    window.location.href = "/notes";
+  };
 
   return (
     <>
@@ -35,7 +46,7 @@ const UserInfo = () => {
               <a onClick={openProfile}>Account Profile</a>
             </li>
             <li>
-              <a>Logout</a>
+              <a onClick={logout}>Logout</a>
             </li>
           </ul>
         </div>
