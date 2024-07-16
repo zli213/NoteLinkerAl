@@ -13,13 +13,6 @@ const LoginModal = () => {
   const location = useLocation();
   const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    if (urlParams.has("token") || urlParams.has("error")) {
-      handleExternalLoginCallback(urlParams);
-    }
-  }, [location]);
-
   const handleEmailLogin = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     try {
@@ -60,34 +53,34 @@ const LoginModal = () => {
     }
   };
 
-  const handleExternalLoginCallback = async (urlParams: URLSearchParams) => {
-    const error = urlParams.get("error");
-    if (error) {
-      setError(`Login failed: ${error}`);
-      return;
-    }
+  // const handleExternalLoginCallback = async (urlParams: URLSearchParams) => {
+  //   const error = urlParams.get("error");
+  //   if (error) {
+  //     setError(`Login failed: ${error}`);
+  //     return;
+  //   }
 
-    const token = urlParams.get("token");
-    const userId = urlParams.get("userId");
-    const userName = urlParams.get("userName");
-    const email = urlParams.get("email");
-    const accountType = urlParams.get("accountType");
-    const avatarUrl = urlParams.get("avatarUrl");
-    const roles = urlParams.get("roles")?.split(",") || [];
+  //   const token = urlParams.get("token");
+  //   const userId = urlParams.get("userId");
+  //   const userName = urlParams.get("userName");
+  //   const email = urlParams.get("email");
+  //   const accountType = urlParams.get("accountType");
+  //   const avatarUrl = urlParams.get("avatarUrl");
+  //   const roles = urlParams.get("roles")?.split(",") || [];
 
-    if (token) {
-      localStorage.setItem("token", token);
-      localStorage.setItem("userId", userId || "");
-      localStorage.setItem("userName", userName || "");
-      localStorage.setItem("email", email || "");
-      localStorage.setItem("accountType", accountType || "");
-      localStorage.setItem("avatarUrl", avatarUrl || "");
-      localStorage.setItem("roles", JSON.stringify(roles));
-      navigate("/inbox");
-    } else {
-      setError("Login failed. Please try again.");
-    }
-  };
+  //   if (token) {
+  //     localStorage.setItem("token", token);
+  //     localStorage.setItem("userId", userId || "");
+  //     localStorage.setItem("userName", userName || "");
+  //     localStorage.setItem("email", email || "");
+  //     localStorage.setItem("accountType", accountType || "");
+  //     localStorage.setItem("avatarUrl", avatarUrl || "");
+  //     localStorage.setItem("roles", JSON.stringify(roles));
+  //     navigate("/inbox");
+  //   } else {
+  //     setError("Login failed. Please try again.");
+  //   }
+  // };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">

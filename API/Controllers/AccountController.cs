@@ -72,7 +72,7 @@ public class AccountController : ControllerBase
     [HttpGet("external-login")]
     public IActionResult ExternalLogin(string provider, string? returnUrl = "")
     {
-        var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { Return = returnUrl });
+        var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { Return = returnUrl });
         var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
         properties.AllowRefresh = true;
         return Challenge(properties, provider);
@@ -88,6 +88,7 @@ public class AccountController : ControllerBase
     }
 
     var info = await _signInManager.GetExternalLoginInfoAsync();
+    _logger.LogInformation($"External login info: {info}");
     if (info == null)
     {
         _logger.LogWarning("External login info is null");
@@ -95,7 +96,7 @@ public class AccountController : ControllerBase
     }
 
     var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-
+    _logger.LogInformation($"Sign in result: {signInResult}");
     if (signInResult.Succeeded)
     { 
         _logger.LogInformation($"User logged in with {info.LoginProvider} provider.");
@@ -103,6 +104,7 @@ public class AccountController : ControllerBase
     }
 
     var userEmail = info.Principal.FindFirstValue(ClaimTypes.Email);
+    _logger.LogInformation($"User email: {userEmail}");
     if(string.IsNullOrEmpty(userEmail))
     {
         _logger.LogWarning("Unable to retrieve email from external login provider");
@@ -110,6 +112,7 @@ public class AccountController : ControllerBase
     }
 
     var user = await _userManager.FindByEmailAsync(userEmail);
+    _logger.LogInformation($"User存在吗?: {user}");
     if(user == null)
     {
         user = new User
@@ -122,12 +125,28 @@ public class AccountController : ControllerBase
         if (result.Succeeded)
         {
             await _userManager.AddToRoleAsync(user, "Member");
+            var addLoginResult = await _userManager.AddLoginAsync(user, info); // Associate external login info with the user
+            if (!addLoginResult.Succeeded)
+            {
+                _logger.LogError($"Error adding external login info: {string.Join(", ", addLoginResult.Errors.Select(e => e.Description))}");
+                return BadRequest(new ErrorResponse { Error = "Error adding external login info", Details = string.Join(", ", addLoginResult.Errors.Select(e => e.Description)) });
+            }
             _logger.LogInformation($"Created new user account with {info.LoginProvider} provider.");
         }
         else
         {
             _logger.LogError($"Error creating user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             return BadRequest(new ErrorResponse { Error = "Error creating user", Details = string.Join(", ", result.Errors.Select(e => e.Description)) });
+        }
+    }
+    else
+    {
+        // Ensure that external login info is associated with the existing user if not already done
+        var addLoginResult = await _userManager.AddLoginAsync(user, info);
+        if (!addLoginResult.Succeeded)
+        {
+            _logger.LogError($"Error adding external login info: {string.Join(", ", addLoginResult.Errors.Select(e => e.Description))}");
+            return BadRequest(new ErrorResponse { Error = "Error adding external login info", Details = string.Join(", ", addLoginResult.Errors.Select(e => e.Description)) });
         }
     }
     await _signInManager.SignInAsync(user, isPersistent: false);
@@ -156,7 +175,11 @@ public class AccountController : ControllerBase
     }
 private async Task<IActionResult> GenerateAuthenticationResponse(ExternalLoginInfo info, string returnUrl)
 {
+    _logger.LogInformation("Generating authentication response.");
+    _logger.LogInformation($"Login Provider: {info.LoginProvider}");
+    _logger.LogInformation($"Provider Key: {info.ProviderKey}");
     var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+    _logger.LogInformation($"User in GenerateAuthenticationResponse: {user}");
     if (user == null)
     {
         return Redirect($"http://localhost:3000/login-callback?error=User not found");
@@ -166,7 +189,7 @@ private async Task<IActionResult> GenerateAuthenticationResponse(ExternalLoginIn
     var roles = await _userManager.GetRolesAsync(user);
 
     // Assuming the frontend handles URL parameters to receive user data and token
-    var redirectUrl = $"http://localhost:3000/inbox?token={token}&userId={user.Id}&userName={user.UserName}&email={user.Email}&accountType={user.AccountType}&avatarUrl={user.AvatarUrl}&roles={string.Join(",", roles)}";
+    var redirectUrl = $"http://localhost:3000/inbox?token={token}";
 
     return Redirect(redirectUrl);
 }
