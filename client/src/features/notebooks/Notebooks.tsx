@@ -1,14 +1,43 @@
+import { useState } from "react";
+import samplePdf from "../../../public/Tell Me About Yourself Worksheet.pdf";
+import { UploadFile } from "../../components/UploadFIle";
+import Chat from "../../components/Chat";
 const Notebooks = () => {
+  const [showDocument, setShowDocument] = useState(true);
+  const [showSupportingContent, setShowSupportingContent] = useState(false);
+  const handleDocumentClick = () => {
+    setShowDocument(true);
+    setShowSupportingContent(false);
+  };
+  const handleSupportingContentClick = () => {
+    setShowDocument(false);
+    setShowSupportingContent(true);
+  };
   return (
-    <div>
+    <div className="flex flex-row">
+      <div className="flex flex-col w-3/4">
+        <div role="tablist" className="tabs tabs-boxed">
+          <button role="tab" className="tab" onClick={handleDocumentClick}>
+            Document
+          </button>
+          <button
+            role="tab"
+            className="tab tab-active"
+            onClick={handleSupportingContentClick}
+          >
+            Supporting content
+          </button>
+        </div>
+        {showDocument && (
+          <iframe title="pdf" src={samplePdf} className="w-full h-full" />
+        )}
+      </div>
       <div
         className="bg-local bg-cover bg-center h-screen w-full flex items-center justify-center"
         style={{ backgroundImage: "url(/images/background.jpg)" }}
       >
-        <input
-          type="file"
-          className="file-input file-input-bordered w-full max-w-xs"
-        />
+        <UploadFile />
+        {/* <Chat /> */}
       </div>
     </div>
   );
