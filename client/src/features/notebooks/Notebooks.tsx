@@ -38,7 +38,7 @@ const Notebooks = () => {
       >
         <UploadFile />
         {/* <Chat /> */}
-      </div>
+al      </div>
     </div>
   );
 };

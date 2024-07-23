@@ -15,9 +15,21 @@ import CustomModal from "./CustomModal";
 import UserInfo from "./UserInfo";
 import { NavLink } from "react-router-dom";
 import LoginModal from "./LoginModal";
+import { useAuth } from "../store/AuthContext";
+import { useState } from "react";
 
 const Sidebar = () => {
   const { theme } = useTheme();
+  const { isLoggedIn } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const handleProtectedClick = (e: React.MouseEvent) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      setShowLoginModal(true);
+    }
+  };
+
   return (
     <div
       className={`w-64 h-screen p-4 flex flex-col shadow-sm ${
@@ -29,20 +41,13 @@ const Sidebar = () => {
       </div>
       <UserInfo />
       <div className="mb-4">
-        {/* <button className=" w-full bg-blue-500 text-white py-2 px-4 rounded hover:text-gray-900 p-2 transition-colors duration-150 ease-in-out hover:bg-blue-600">
-          Sign In
-        </button> */}
-        <CustomModal name="Sign in">
-          <LoginModal />
-        </CustomModal>{" "}
-      </div>
-      <div className="mb-4">
         <button
           className={`btn w-full py-2 px-4 rounded ${
             theme === "dark"
               ? "bg-slate-700 text-white hover:bg-slate-800"
               : "bg-zinc-200 text-black  hover:bg-zinc-300"
           }`}
+          onClick={handleProtectedClick}
         >
           + New Thread
         </button>
@@ -51,8 +56,8 @@ const Sidebar = () => {
       <nav className="flex-grow">
         <ul>
           <li className="mb-2">
-            <a
-              href="#"
+            <NavLink
+              to="/"
               className={`flex items-center p-2 rounded ${
                 theme === "dark"
                   ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
@@ -61,9 +66,8 @@ const Sidebar = () => {
             >
               <Home className="mr-2" size={20} />
               Home
-            </a>
+            </NavLink>
           </li>
-          {/* Add inbox */}
           <li className="mb-2">
             <NavLink
               to="/inbox"
@@ -72,12 +76,12 @@ const Sidebar = () => {
                   ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
                   : "text-gray-700 hover:text-gray-900 hover:bg-gray-200"
               }`}
+              onClick={handleProtectedClick}
             >
               <Inbox className="mr-2" size={20} />
               Inbox
             </NavLink>
           </li>
-          {/* Add notes */}
           <li className="mb-2">
             <NavLink
               to="/notes"
@@ -86,6 +90,7 @@ const Sidebar = () => {
                   ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
                   : "text-gray-700 hover:text-gray-900 hover:bg-gray-200"
               }`}
+              onClick={handleProtectedClick}
             >
               <StickyNote className="mr-2" size={20} />
               Notes
@@ -99,6 +104,7 @@ const Sidebar = () => {
                   ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
                   : "text-gray-700 hover:text-gray-900 hover:bg-gray-200"
               }`}
+              onClick={handleProtectedClick}
             >
               <NotebookTabs className="mr-2" size={20} />
               Notebooks
@@ -112,6 +118,7 @@ const Sidebar = () => {
                   ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
                   : "text-gray-700 hover:text-gray-900 hover:bg-gray-200"
               }`}
+              onClick={handleProtectedClick}
             >
               <Trash2 className="mr-2" size={20} />
               Trash
@@ -125,27 +132,14 @@ const Sidebar = () => {
                   ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
                   : "text-gray-700 hover:text-gray-900 hover:bg-gray-200"
               }`}
+              onClick={handleProtectedClick}
             >
               <Clock className="mr-2" size={20} />
               History
             </NavLink>
           </li>
-          {/* Add more menu items as needed */}
         </ul>
       </nav>
-
-      {/* <div className="mt-auto">
-        <div className="bg-white p-4 rounded shadow">
-          <h3 className="font-bold mb-2">Upgrade to Pro</h3>
-          <p className="text-sm text-gray-600 mb-2">
-            Unlimited access to top models like GPT-4o and other advanced
-            features.
-          </p>
-          <button className="w-full bg-blue-500 text-white py-2 px-4 rounded">
-            Learn More
-          </button>
-        </div>
-      </div> */}
 
       <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
         <button className="flex items-center justify-center p-2 hover:bg-gray-200 rounded">
@@ -154,7 +148,6 @@ const Sidebar = () => {
         </button>
         <div className="flex items-center">
           <ThemeToggle />
-
           <div className="dropdown dropdown-top dropdown-end">
             <label tabIndex={0} className="btn btn-sm btn-ghost">
               <Globe size={16} />
@@ -173,6 +166,12 @@ const Sidebar = () => {
           </div>
         </div>
       </div>
+
+      {showLoginModal && (
+        <CustomModal name="Sign in" onClose={() => setShowLoginModal(false)}>
+          <LoginModal />
+        </CustomModal>
+      )}
     </div>
   );
 };
