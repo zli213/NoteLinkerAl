@@ -2,9 +2,16 @@ import { useState } from "react";
 import samplePdf from "../../../public/Tell Me About Yourself Worksheet.pdf";
 import { UploadFile } from "../../components/UploadFIle";
 import Chat from "../../components/Chat";
+import { useAuth } from "../../store/AuthContext";
+import { useNavigate } from "react-router-dom";
 const Notebooks = () => {
   const [showDocument, setShowDocument] = useState(true);
   const [showSupportingContent, setShowSupportingContent] = useState(false);
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+  if (!isLoggedIn) {
+    navigate("/");
+  }
   const handleDocumentClick = () => {
     setShowDocument(true);
     setShowSupportingContent(false);
@@ -38,7 +45,8 @@ const Notebooks = () => {
       >
         <UploadFile />
         {/* <Chat /> */}
-al      </div>
+        al{" "}
+      </div>
     </div>
   );
 };
