@@ -1,8 +1,6 @@
-import { useState, useEffect, useContext } from "react";
-// import { LoginContext } from "../../loginContext";
-// import { requireLogin } from "../../authConfig";
+import { useState, useEffect } from "react";
 import { SpeechInput } from "./SpeechInput";
-
+import { Send } from "lucide-react";
 interface Props {
   onSend: (question: string) => void;
   disabled: boolean;
@@ -21,7 +19,6 @@ export const QuestionInput = ({
   showSpeechInput,
 }: Props) => {
   const [question, setQuestion] = useState<string>("");
-  // const { loggedIn } = useContext(LoginContext);
 
   useEffect(() => {
     initQuestion && setQuestion(initQuestion);
@@ -57,15 +54,8 @@ export const QuestionInput = ({
     }
   };
 
-  // const disableRequiredAccessControl = requireLogin && !loggedIn;
-  // const sendQuestionDisabled = disabled || !question.trim() || (requireLogin && !loggedIn);
-
-  // if (disableRequiredAccessControl) {
-  //     placeholder = "Please login to continue...";
-  // }
-
   return (
-    <div className="flex items-start space-x-2">
+    <div className="flex space-x-2 items-center">
       <textarea
         className="textarea textarea-bordered w-full resize-none"
         // disabled={disableRequiredAccessControl}
@@ -80,20 +70,7 @@ export const QuestionInput = ({
         onClick={sendQuestion}
         title="Submit question"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          className="w-6 h-6"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M3 10h1l9 9-4.5-4.5 1.5-1.5L21 3h-1l-9 9-1.5 1.5L3 13v-1z"
-          />
-        </svg>
+        <Send />
       </button>
       {showSpeechInput && <SpeechInput updateQuestion={setQuestion} />}
     </div>

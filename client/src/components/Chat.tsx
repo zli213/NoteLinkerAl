@@ -2,7 +2,6 @@ import { useRef, useState, useEffect, useContext } from "react";
 import readNDJSONStream from "ndjson-readablestream";
 import {
   chatApi,
-  configApi,
   getSpeechApi,
   RetrievalMode,
   ChatAppResponse,
@@ -17,7 +16,7 @@ import { QuestionInput } from "./QuestionInput";
 // import { ExampleList } from "./Example";
 import { UserChatMessage } from "./UserChatMessage";
 import { AnalysisPanel, AnalysisPanelTabs } from "./AnalysisPanel";
-import { useLogin, getToken, requireAccessControl } from "./../authConfig";
+import { useAuth } from "../store/AuthContext";
 import { UploadFile } from "./UploadFIle";
 import { GPT4VSettings } from "./GPT4VSettings";
 import { VectorSettings } from "./VectorSettings";
@@ -25,7 +24,6 @@ import { VectorSettings } from "./VectorSettings";
 // import { LoginContext } from "../../loginContext";
 
 const Chat = () => {
-  const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
   const [promptTemplate, setPromptTemplate] = useState<string>("");
   const [temperature, setTemperature] = useState<number>(0.3);
   const [seed, setSeed] = useState<number | null>(null);
@@ -86,32 +84,6 @@ const Chat = () => {
   const [showSpeechOutputAzure, setShowSpeechOutputAzure] =
     useState<boolean>(false);
 
-  const getConfig = async () => {
-    configApi().then(
-      (config: {
-        showGPT4VOptions: boolean | ((prevState: boolean) => boolean);
-        showSemanticRankerOption: boolean | ((prevState: boolean) => boolean);
-        showVectorOption: boolean | ((prevState: boolean) => boolean);
-        showUserUpload: boolean | ((prevState: boolean) => boolean);
-        showSpeechInput: boolean | ((prevState: boolean) => boolean);
-        showSpeechOutputBrowser: boolean | ((prevState: boolean) => boolean);
-        showSpeechOutputAzure: boolean | ((prevState: boolean) => boolean);
-      }) => {
-        setShowGPT4VOptions(config.showGPT4VOptions);
-        setUseSemanticRanker(config.showSemanticRankerOption);
-        setShowSemanticRankerOption(config.showSemanticRankerOption);
-        setShowVectorOption(config.showVectorOption);
-        if (!config.showVectorOption) {
-          setRetrievalMode(RetrievalMode.Text);
-        }
-        setShowUserUpload(config.showUserUpload);
-        setShowSpeechInput(config.showSpeechInput);
-        setShowSpeechOutputBrowser(config.showSpeechOutputBrowser);
-        setShowSpeechOutputAzure(config.showSpeechOutputAzure);
-      }
-    );
-  };
-
   const handleAsyncRequest = async (
     question: string,
     answers: [string, ChatAppResponse][],
@@ -157,9 +129,7 @@ const Chat = () => {
     };
     return fullResponse;
   };
-
-  // const client = useLogin ? useMsal().instance : undefined;
-  // const { loggedIn } = useContext(LoginContext);
+  const { isLoggedIn } = useAuth();
 
   const makeApiRequest = async (question: string) => {
     lastQuestionRef.current = question;
@@ -168,9 +138,7 @@ const Chat = () => {
     setIsLoading(true);
     setActiveCitation(undefined);
     setActiveAnalysisPanelTab(undefined);
-
-    // const token = client ? await getToken(client) : undefined;
-    const token = undefined;
+    const token = isLoggedIn ? localStorage.getItem("token") : undefined;
 
     try {
       const messages: ResponseMessage[] = answers.flatMap((a) => [
@@ -207,7 +175,7 @@ const Chat = () => {
           : null,
       };
 
-      const response = await chatApi(request, shouldStream, token);
+      const response = await chatApi(request, shouldStream, token || "");
       if (!response.body) {
         throw Error("No response body");
       }
@@ -251,9 +219,6 @@ const Chat = () => {
     () => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "auto" }),
     [streamedAnswers]
   );
-  useEffect(() => {
-    getConfig();
-  }, []);
 
   useEffect(() => {
     if (answers && showSpeechOutputAzure) {
@@ -392,7 +357,7 @@ const Chat = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 bg-white border border-gray-400 w-11/12 h-5/6 rounded-md flex flex-col justify-between">
       <div className="flex justify-between mb-4">
         <button
           className="btn btn-primary"
@@ -401,13 +366,7 @@ const Chat = () => {
         >
           Clear Chat
         </button>
-        {showUserUpload && <UploadFile className="btn" />}
-        <button
-          className="btn btn-secondary"
-          onClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
-        >
-          Settings
-        </button>
+        {/* <UploadFile className="btn" /> */}
       </div>
       <div className="flex flex-col">
         {!lastQuestionRef.current ? (
@@ -532,290 +491,6 @@ const Chat = () => {
           answer={answers[selectedAnswer][1]}
           activeTab={activeAnalysisPanelTab}
         />
-      )}
-
-      {isConfigPanelOpen && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center">
-          <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full">
-            <h2 className="text-xl font-bold mb-4">
-              Configure answer generation
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="promptTemplate"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Override prompt template
-                </label>
-                <textarea
-                  id="promptTemplate"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  value={promptTemplate}
-                  onChange={(e) => setPromptTemplate(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="temperature"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Temperature
-                </label>
-                <input
-                  type="number"
-                  id="temperature"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  min={0}
-                  max={1}
-                  step={0.1}
-                  value={temperature}
-                  onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="seed"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Seed
-                </label>
-                <input
-                  type="text"
-                  id="seed"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  value={seed?.toString() || ""}
-                  onChange={(e) => setSeed(parseInt(e.target.value))}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="minimumSearchScore"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Minimum search score
-                </label>
-                <input
-                  type="number"
-                  id="minimumSearchScore"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  min={0}
-                  step={0.01}
-                  value={minimumSearchScore}
-                  onChange={(e) =>
-                    setMinimumSearchScore(parseFloat(e.target.value))
-                  }
-                />
-              </div>
-
-              {showSemanticRankerOption && (
-                <div>
-                  <label
-                    htmlFor="minimumRerankerScore"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Minimum reranker score
-                  </label>
-                  <input
-                    type="number"
-                    id="minimumRerankerScore"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    min={1}
-                    max={4}
-                    step={0.1}
-                    value={minimumRerankerScore}
-                    onChange={(e) =>
-                      setMinimumRerankerScore(parseFloat(e.target.value))
-                    }
-                  />
-                </div>
-              )}
-
-              <div>
-                <label
-                  htmlFor="retrieveCount"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Retrieve this many search results:
-                </label>
-                <input
-                  type="number"
-                  id="retrieveCount"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  min={1}
-                  max={50}
-                  value={retrieveCount}
-                  onChange={(e) => setRetrieveCount(parseInt(e.target.value))}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="excludeCategory"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Exclude category
-                </label>
-                <input
-                  type="text"
-                  id="excludeCategory"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  value={excludeCategory}
-                  onChange={(e) => setExcludeCategory(e.target.value)}
-                />
-              </div>
-
-              {showSemanticRankerOption && (
-                <>
-                  <div className="flex items-start">
-                    <input
-                      id="useSemanticRanker"
-                      type="checkbox"
-                      className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      checked={useSemanticRanker}
-                      onChange={(e) => setUseSemanticRanker(e.target.checked)}
-                    />
-                    <label
-                      htmlFor="useSemanticRanker"
-                      className="ml-2 block text-sm text-gray-900"
-                    >
-                      Use semantic ranker for retrieval
-                    </label>
-                  </div>
-
-                  <div className="flex items-start">
-                    <input
-                      id="useSemanticCaptions"
-                      type="checkbox"
-                      className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      checked={useSemanticCaptions}
-                      onChange={(e) => setUseSemanticCaptions(e.target.checked)}
-                      disabled={!useSemanticRanker}
-                    />
-                    <label
-                      htmlFor="useSemanticCaptions"
-                      className="ml-2 block text-sm text-gray-900"
-                    >
-                      Use semantic captions
-                    </label>
-                  </div>
-                </>
-              )}
-
-              <div className="flex items-start">
-                <input
-                  id="useSuggestFollowupQuestions"
-                  type="checkbox"
-                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                  checked={useSuggestFollowupQuestions}
-                  onChange={(e) =>
-                    setUseSuggestFollowupQuestions(e.target.checked)
-                  }
-                />
-                <label
-                  htmlFor="useSuggestFollowupQuestions"
-                  className="ml-2 block text-sm text-gray-900"
-                >
-                  Suggest follow-up questions
-                </label>
-              </div>
-
-              {showGPT4VOptions && (
-                <GPT4VSettings
-                  gpt4vInputs={gpt4vInput}
-                  isUseGPT4V={useGPT4V}
-                  updateUseGPT4V={(useGPT4V) => {
-                    setUseGPT4V(useGPT4V);
-                  }}
-                  updateGPT4VInputs={(inputs) => setGPT4VInput(inputs)}
-                />
-              )}
-
-              {showVectorOption && (
-                <VectorSettings
-                  defaultRetrievalMode={retrievalMode}
-                  showImageOptions={useGPT4V && showGPT4VOptions}
-                  updateVectorFields={(options: VectorFieldOptions[]) =>
-                    setVectorFieldList(options)
-                  }
-                  updateRetrievalMode={(retrievalMode: RetrievalMode) =>
-                    setRetrievalMode(retrievalMode)
-                  }
-                />
-              )}
-
-              {useLogin && (
-                <>
-                  <div className="flex items-start">
-                    <input
-                      id="useOidSecurityFilter"
-                      type="checkbox"
-                      className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      checked={useOidSecurityFilter || requireAccessControl}
-                      // disabled={!loggedIn || requireAccessControl}
-                      onChange={(e) =>
-                        setUseOidSecurityFilter(e.target.checked)
-                      }
-                    />
-                    <label
-                      htmlFor="useOidSecurityFilter"
-                      className="ml-2 block text-sm text-gray-900"
-                    >
-                      Use oid security filter
-                    </label>
-                  </div>
-                  <div className="flex items-start">
-                    <input
-                      id="useGroupsSecurityFilter"
-                      type="checkbox"
-                      className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      checked={useGroupsSecurityFilter || requireAccessControl}
-                      // disabled={!loggedIn || requireAccessControl}
-                      onChange={(e) =>
-                        setUseGroupsSecurityFilter(e.target.checked)
-                      }
-                    />
-                    <label
-                      htmlFor="useGroupsSecurityFilter"
-                      className="ml-2 block text-sm text-gray-900"
-                    >
-                      Use groups security filter
-                    </label>
-                  </div>
-                </>
-              )}
-
-              <div className="flex items-start">
-                <input
-                  id="shouldStream"
-                  type="checkbox"
-                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                  checked={shouldStream}
-                  onChange={(e) => setShouldStream(e.target.checked)}
-                />
-                <label
-                  htmlFor="shouldStream"
-                  className="ml-2 block text-sm text-gray-900"
-                >
-                  Stream chat completion responses
-                </label>
-              </div>
-
-              {/* {useLogin && <TokenClaimsDisplay />} */}
-            </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                className="btn btn-secondary"
-                onClick={() => setIsConfigPanelOpen(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

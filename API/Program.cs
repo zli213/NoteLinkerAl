@@ -10,6 +10,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Azure;
+using Azure.AI.OpenAI;
+using Azure.Search.Documents;
+using Azure.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,7 +85,6 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultSignInScheme = IdentityConstants.ExternalScheme;  
 })
-
 .AddJwtBearer(options =>
 {
     options.SaveToken = true;
@@ -96,20 +99,15 @@ builder.Services.AddAuthentication(options =>
 })
 .AddGoogle(options =>
 {
-    
     options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
-    // options.CallbackPath = "/signin-google";
     options.Scope.Add("profile");
-    // options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.SignInScheme = IdentityConstants.ExternalScheme;
 })
 .AddMicrosoftAccount(microsoftOptions =>
 {
     microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]!;
     microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"]!;
-    // microsoftOptions.CallbackPath = "/signin-microsoft";
-    // microsoftOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     microsoftOptions.SignInScheme = IdentityConstants.ExternalScheme;
 })
 .AddCookie(IdentityConstants.ApplicationScheme, options =>
@@ -122,12 +120,6 @@ builder.Services.AddAuthentication(options =>
 });
 
 // Configure cookie policy
-// builder.Services.Configure<CookiePolicyOptions>(options =>
-// {
-//     options.CheckConsentNeeded = context => true;
-//     options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
-// });
-
 builder.Services.AddAntiforgery(options => options.Cookie.SameSite = SameSiteMode.None);
 
 builder.Services.AddAuthorization(options =>
@@ -135,8 +127,35 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireAuthenticatedUser", policy => policy.RequireAuthenticatedUser());
 });
 
-builder.Services.AddScoped<TokenService>();
+// Read configuration file
+var configuration = builder.Configuration;
+string endpoint = configuration["AzureOpenAI:Endpoint"] ?? throw new ArgumentNullException(nameof(endpoint), "AzureOpenAI:Endpoint configuration is missing or empty.");
+string key = configuration["AzureOpenAI:Key"] ?? throw new ArgumentNullException(nameof(key), "AzureOpenAI:Key configuration is missing or empty.");
+string visionEndpoint = configuration["AzureComputerVision:Endpoint"] ?? throw new ArgumentNullException(nameof(visionEndpoint), "AzureComputerVision:Endpoint configuration is missing or empty.");
+string visionApiKey = configuration["AzureComputerVision:ApiKey"] ?? throw new ArgumentNullException(nameof(visionApiKey), "AzureComputerVision:ApiKey configuration is missing or empty.");
 
+// Inject OpenAI services
+builder.Services.AddSingleton<IConfiguration>(configuration);
+builder.Services.AddSingleton<ISearchService, AzureSearchService>();
+builder.Services.AddSingleton<IComputerVisionService>(sp =>
+{
+    var httpClient = sp.GetRequiredService<HttpClient>();
+    return new AzureComputerVisionService(httpClient, visionEndpoint, visionApiKey);
+});
+builder.Services.AddHttpClient(); // 添加 HttpClient 配置
+builder.Services.AddSingleton<SearchClient>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var searchEndpoint = new Uri(config["AzureSearch:Endpoint"]);
+    var searchApiKey = new AzureKeyCredential(config["AzureSearch:ApiKey"]);
+    return new SearchClient(searchEndpoint, "indexName", searchApiKey); // 请替换 "indexName" 为实际的索引名称
+});
+builder.Services.AddSingleton<OpenAIClient>(sp =>
+{
+    return new OpenAIClient(new Uri(endpoint), new AzureKeyCredential(key));
+});
+builder.Services.AddTransient<ReadRetrieveReadChatService>();
+builder.Services.AddScoped<TokenService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -152,7 +171,6 @@ app.UseCors(opt =>
        .AllowCredentials()  
        .WithOrigins("http://localhost:3000");
 });
-// app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 

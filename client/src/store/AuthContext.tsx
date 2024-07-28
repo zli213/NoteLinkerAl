@@ -1,3 +1,4 @@
+// AuthProvider.tsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
@@ -18,9 +19,11 @@ interface AuthContextType {
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   updateAuth: () => void;
+  logout: () => void;
+  getToken: () => Promise<string | undefined>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -36,6 +39,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updateAuth = () => {
     setHaveChange((prev) => !prev);
+  };
+
+  const getToken = async (): Promise<string | undefined> => {
+    // Logic to get the token
+    // This is just a placeholder logic
+    const token = localStorage.getItem("token");
+    return token ? token : undefined;
   };
 
   useEffect(() => {
@@ -83,6 +93,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     setIsLoading,
     updateAuth,
+    logout: () => {
+      localStorage.removeItem("token");
+      setUser(null);
+      setIsLoggedIn(false);
+    },
+    getToken,
   };
 
   return (
