@@ -1,6 +1,12 @@
 import Card from "../../components/Card";
-
+import { useAuth } from "../../store/AuthContext";
+import { useNavigate } from "react-router-dom";
 export default function NotesPage() {
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+  if (!isLoggedIn) {
+    navigate("/");
+  }
   return (
     <div className="flex flex-col h-screen">
       <h1 className="text-4xl font-bold mb-8 ml-8 mt-3">Notes</h1>

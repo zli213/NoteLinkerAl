@@ -2,17 +2,29 @@ import { useState } from "react";
 import samplePdf from "../../../public/Tell Me About Yourself Worksheet.pdf";
 import { UploadFile } from "../../components/UploadFIle";
 import Chat from "../../components/Chat";
+import { useAuth } from "../../store/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 const Notebooks = () => {
   const [showDocument, setShowDocument] = useState(true);
   const [showSupportingContent, setShowSupportingContent] = useState(false);
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+
+  if (!isLoggedIn) {
+    navigate("/");
+  }
+
   const handleDocumentClick = () => {
     setShowDocument(true);
     setShowSupportingContent(false);
   };
+
   const handleSupportingContentClick = () => {
     setShowDocument(false);
     setShowSupportingContent(true);
   };
+
   return (
     <div className="flex flex-row">
       <div className="flex flex-col w-3/4">
@@ -33,11 +45,11 @@ const Notebooks = () => {
         )}
       </div>
       <div
-        className="bg-local bg-cover bg-center h-screen w-full flex items-center justify-center"
+        className="bg-local bg-cover bg-center h-screen w-full flex flex-col items-center justify-around"
         style={{ backgroundImage: "url(/images/background.jpg)" }}
       >
         <UploadFile />
-        {/* <Chat /> */}
+        <Chat />
       </div>
     </div>
   );

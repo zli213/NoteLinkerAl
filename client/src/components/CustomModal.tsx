@@ -3,14 +3,18 @@ import { useState, useRef, useEffect, ReactNode } from "react";
 interface CustomModalProps {
   name: string;
   children: ReactNode;
+  onClose: () => void;
 }
 
-const CustomModal = ({ name, children }: CustomModalProps) => {
+const CustomModal = ({ name, children, onClose }: CustomModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const openModal = () => setIsOpen(true);
-  const closeModal = () => setIsOpen(false);
+  const closeModal = () => {
+    setIsOpen(false);
+    onClose();
+  };
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -57,6 +61,12 @@ const CustomModal = ({ name, children }: CustomModalProps) => {
             className="relative bg-white p-6 rounded-lg shadow-xl max-w-md w-full"
           >
             {children}
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              onClick={closeModal}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

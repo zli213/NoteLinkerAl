@@ -2,18 +2,60 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../../public/images/logo.svg";
+import { useAuth } from "../store/AuthContext";
 
 const LoginModal = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { setUser, setIsLoggedIn, updateAuth, isLoading, setIsLoading } =
+    useAuth();
+
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const [debugInfo, setDebugInfo] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
+  const [debugInfo, setDebugInfo] = useState("");
   const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const token = urlParams.get("token");
+
+    if (token) {
+      localStorage.setItem("token", token);
+
+      axios
+        .get(`${apiUrl}/api/account/currentUser`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          const userData = response.data;
+          setUser(userData);
+          setIsLoggedIn(true);
+          updateAuth();
+          navigate("/inbox");
+        })
+        .catch((error) => {
+          setError("Failed to fetch user info. Please try again.");
+          console.error("Error fetching user info:", error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [
+    location.search,
+    setUser,
+    setIsLoggedIn,
+    updateAuth,
+    apiUrl,
+    navigate,
+    setIsLoading,
+  ]);
+
   const handleEmailLogin = async (e: { preventDefault: () => void }) => {
+    setIsLoading(true);
     e.preventDefault();
     try {
       const response = await axios.post(`${apiUrl}/api/account/login`, {
@@ -26,7 +68,22 @@ const LoginModal = () => {
       );
 
       if (response.data && response.data.token) {
-        localStorage.setItem("token", response.data.token);
+        const token = response.data.token;
+        localStorage.setItem("token", token);
+
+        const userResponse = await axios.get(
+          `${apiUrl}/api/account/currentUser`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const userData = userResponse.data;
+        setUser(userData);
+        setIsLoggedIn(true);
+        updateAuth();
         navigate("/inbox");
       } else {
         setError("Login failed. Please try again.");
@@ -37,6 +94,8 @@ const LoginModal = () => {
       } else {
         setError("An error occurred. Please try again.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,35 +111,6 @@ const LoginModal = () => {
       setIsLoading(false);
     }
   };
-
-  // const handleExternalLoginCallback = async (urlParams: URLSearchParams) => {
-  //   const error = urlParams.get("error");
-  //   if (error) {
-  //     setError(`Login failed: ${error}`);
-  //     return;
-  //   }
-
-  //   const token = urlParams.get("token");
-  //   const userId = urlParams.get("userId");
-  //   const userName = urlParams.get("userName");
-  //   const email = urlParams.get("email");
-  //   const accountType = urlParams.get("accountType");
-  //   const avatarUrl = urlParams.get("avatarUrl");
-  //   const roles = urlParams.get("roles")?.split(",") || [];
-
-  //   if (token) {
-  //     localStorage.setItem("token", token);
-  //     localStorage.setItem("userId", userId || "");
-  //     localStorage.setItem("userName", userName || "");
-  //     localStorage.setItem("email", email || "");
-  //     localStorage.setItem("accountType", accountType || "");
-  //     localStorage.setItem("avatarUrl", avatarUrl || "");
-  //     localStorage.setItem("roles", JSON.stringify(roles));
-  //     navigate("/inbox");
-  //   } else {
-  //     setError("Login failed. Please try again.");
-  //   }
-  // };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
@@ -148,7 +178,7 @@ const LoginModal = () => {
             Continue with Email
           </button>
         </form>
-        {/* Display debug information */}
+
         <div className="mt-4">
           <pre>{debugInfo}</pre>
         </div>

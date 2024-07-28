@@ -1,22 +1,26 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+// src/components/Logout.js
+import { useAuth } from "../store/AuthContext";
 
 const Logout = () => {
+  const { setUser, setIsLoggedIn, updateAuth, setIsLoading } = useAuth();
   const navigate = useNavigate();
+  const handleLogout = async () => {
+    setIsLoading(true);
+    try {
+      localStorage.removeItem("token");
+      setUser(null);
+      setIsLoggedIn(false);
+      updateAuth();
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      setIsLoading(false);
+    }
+    navigate("/");
+  };
 
-  useEffect(() => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("email");
-    localStorage.removeItem("accountType");
-    localStorage.removeItem("avatarUrl");
-    localStorage.removeItem("roles");
-
-    navigate("/inbox");
-  }, [navigate]);
-
-  return null;
+  return <button onClick={handleLogout}>Logout</button>;
 };
 
 export default Logout;
