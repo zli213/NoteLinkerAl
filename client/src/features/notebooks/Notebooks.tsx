@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import samplePdf from "../../../public/Tell Me About Yourself Worksheet.pdf";
 import { UploadFile } from "../../components/UploadFIle";
 import Chat from "../../components/Chat";
@@ -11,9 +11,11 @@ const Notebooks = () => {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
-  if (!isLoggedIn) {
-    navigate("/");
-  }
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/");
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleDocumentClick = () => {
     setShowDocument(true);

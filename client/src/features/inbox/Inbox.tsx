@@ -1,14 +1,21 @@
+import React, { useEffect } from "react";
 import CardStack from "../../components/CardStack";
 import TimeLine from "../../components/TimeLine";
 import Editor from "../../components/Editor";
 import { useAuth } from "../../store/AuthContext";
 import { useNavigate } from "react-router-dom";
+
 export default function Inbox() {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
-  if (!isLoggedIn) {
-    navigate("/");
-  }
+
+  useEffect(() => {
+    console.log("Inbox useEffect triggered, isLoggedIn:", isLoggedIn);
+    if (!isLoggedIn) {
+      navigate("/");
+    }
+  }, [isLoggedIn, navigate]);
+
   return (
     <div className="flex flex-col justify-around items-center h-screen flex-grow">
       <TimeLine />

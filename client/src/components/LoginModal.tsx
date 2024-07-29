@@ -9,7 +9,6 @@ const LoginModal = () => {
   const [password, setPassword] = useState("");
   const { setUser, setIsLoggedIn, updateAuth, isLoading, setIsLoading } =
     useAuth();
-
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,7 +20,12 @@ const LoginModal = () => {
     const token = urlParams.get("token");
 
     if (token) {
+      console.log("Token found in URL parameters:", token);
       localStorage.setItem("token", token);
+      console.log(
+        "Token stored in localStorage:",
+        localStorage.getItem("token")
+      );
 
       axios
         .get(`${apiUrl}/api/account/currentUser`, {
@@ -32,6 +36,7 @@ const LoginModal = () => {
         .then((response) => {
           const userData = response.data;
           setUser(userData);
+          localStorage.setItem("token", token);
           setIsLoggedIn(true);
           updateAuth();
           navigate("/inbox");
@@ -43,6 +48,8 @@ const LoginModal = () => {
         .finally(() => {
           setIsLoading(false);
         });
+    } else {
+      console.log("No token found in URL parameters.");
     }
   }, [
     location.search,
@@ -69,7 +76,12 @@ const LoginModal = () => {
 
       if (response.data && response.data.token) {
         const token = response.data.token;
+        console.log("Token received from login response:", token);
         localStorage.setItem("token", token);
+        console.log(
+          "Token stored in localStorage:",
+          localStorage.getItem("token")
+        );
 
         const userResponse = await axios.get(
           `${apiUrl}/api/account/currentUser`,
@@ -83,6 +95,7 @@ const LoginModal = () => {
         const userData = userResponse.data;
         setUser(userData);
         setIsLoggedIn(true);
+        localStorage.setItem("token", token);
         updateAuth();
         navigate("/inbox");
       } else {
