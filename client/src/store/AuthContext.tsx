@@ -17,7 +17,6 @@ interface AuthContextType {
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  updateAuth: () => void;
   logout: () => void;
   getToken: () => Promise<string | undefined>;
 }
@@ -70,10 +69,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initAuth();
   }, []);
 
-  const updateAuth = () => {
-    setIsLoggedIn((prev) => !prev);
-  };
-
   const contextValue: AuthContextType = {
     isLoggedIn,
     user,
@@ -81,7 +76,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoggedIn,
     isLoading,
     setIsLoading,
-    updateAuth,
     logout: () => {
       localStorage.removeItem("token");
       setUser(null);

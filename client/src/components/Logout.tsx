@@ -1,17 +1,13 @@
 import { useNavigate } from "react-router-dom";
-// src/components/Logout.js
 import { useAuth } from "../store/AuthContext";
 
 const Logout = () => {
-  const { setUser, setIsLoggedIn, updateAuth, setIsLoading } = useAuth();
+  const { setIsLoading, logout } = useAuth();
   const navigate = useNavigate();
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      localStorage.removeItem("token");
-      setUser(null);
-      setIsLoggedIn(false);
-      updateAuth();
+      logout();
     } catch (error) {
       console.error("Logout failed", error);
     } finally {

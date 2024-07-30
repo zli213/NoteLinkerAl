@@ -7,59 +7,56 @@ import { useAuth } from "../store/AuthContext";
 const LoginModal = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setUser, setIsLoggedIn, updateAuth, isLoading, setIsLoading } =
-    useAuth();
-  const [error, setError] = useState("");
+  const { setUser, setIsLoggedIn, setIsLoading } = useAuth();
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const [debugInfo, setDebugInfo] = useState("");
   const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const token = urlParams.get("token");
+    const handleCallback = async () => {
+      setIsLoading(true);
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
+      const error = params.get("error");
+      if (error) {
+        console.error("External login error:", error);
+        setIsLoading(false);
+        setError("External login failed. Please try again.");
+        return;
+      }
 
-    if (token) {
-      console.log("Token found in URL parameters:", token);
-      localStorage.setItem("token", token);
-      console.log(
-        "Token stored in localStorage:",
-        localStorage.getItem("token")
-      );
-
-      axios
-        .get(`${apiUrl}/api/account/currentUser`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          const userData = response.data;
-          setUser(userData);
-          localStorage.setItem("token", token);
+      if (token) {
+        localStorage.setItem("token", token);
+        try {
+          const response = await axios.get(
+            `${apiUrl}/api/account/currentUser`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          const user = response.data;
+          localStorage.setItem("user", JSON.stringify(user)); // Store user info in local storage
+          setUser(user);
           setIsLoggedIn(true);
-          updateAuth();
           navigate("/inbox");
-        })
-        .catch((error) => {
-          setError("Failed to fetch user info. Please try again.");
-          console.error("Error fetching user info:", error);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    } else {
-      console.log("No token found in URL parameters.");
+        } catch (err) {
+          console.error("Failed to fetch user info:", err);
+        }
+      }
+
+      setIsLoading(false);
+    };
+
+    if (
+      window.location.search.includes("token") ||
+      window.location.search.includes("error")
+    ) {
+      handleCallback();
     }
-  }, [
-    location.search,
-    setUser,
-    setIsLoggedIn,
-    updateAuth,
-    apiUrl,
-    navigate,
-    setIsLoading,
-  ]);
+  }, [setIsLoading, setUser, setIsLoggedIn, apiUrl, navigate]);
 
   const handleEmailLogin = async (e: { preventDefault: () => void }) => {
     setIsLoading(true);
@@ -69,44 +66,19 @@ const LoginModal = () => {
         email,
         password,
       });
-
-      setDebugInfo(
-        `Response received: ${JSON.stringify(response.data, null, 2)}`
-      );
-
-      if (response.data && response.data.token) {
-        const token = response.data.token;
-        console.log("Token received from login response:", token);
-        localStorage.setItem("token", token);
-        console.log(
-          "Token stored in localStorage:",
-          localStorage.getItem("token")
-        );
-
-        const userResponse = await axios.get(
-          `${apiUrl}/api/account/currentUser`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const userData = userResponse.data;
-        setUser(userData);
+      if (response.status !== 200) {
+        throw new Error("Login failed");
+      } else {
+        const user = response.data;
+        localStorage.setItem("token", user.token);
+        localStorage.setItem("user", JSON.stringify(user));
+        setUser(user);
         setIsLoggedIn(true);
-        localStorage.setItem("token", token);
-        updateAuth();
         navigate("/inbox");
-      } else {
-        setError("Login failed. Please try again.");
       }
-    } catch (err: any) {
-      if (err.response && err.response.data) {
-        setError(err.response.data.error || "Invalid email or password");
-      } else {
-        setError("An error occurred. Please try again.");
-      }
+    } catch (err) {
+      console.error("Login failed:", err);
+      setError("Login failed. Please check your email and password.");
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +88,7 @@ const LoginModal = () => {
     setIsLoading(true);
     setError("");
     try {
-      window.location.href = `${apiUrl}/api/account/external-login?provider=${provider}`;
+      window.location.href = `${apiUrl}/api/account/external-login?provider=${provider}&returnUrl=${window.location.origin}/login`;
     } catch (error) {
       console.error("Failed to initiate external login:", error);
       setError("Failed to initiate login. Please try again.");
@@ -191,10 +163,6 @@ const LoginModal = () => {
             Continue with Email
           </button>
         </form>
-
-        <div className="mt-4">
-          <pre>{debugInfo}</pre>
-        </div>
       </div>
     </div>
   );

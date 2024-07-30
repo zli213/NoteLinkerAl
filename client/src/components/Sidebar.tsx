@@ -55,19 +55,21 @@ const Sidebar = () => {
 
       <nav className="flex-grow">
         <ul>
-          <li className="mb-2">
-            <NavLink
-              to="/"
-              className={`flex items-center p-2 rounded ${
-                theme === "dark"
-                  ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
-                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-200"
-              }`}
-            >
-              <Home className="mr-2" size={20} />
-              Home
-            </NavLink>
-          </li>
+          {!isLoggedIn && (
+            <li className="mb-2">
+              <NavLink
+                to="/"
+                className={`flex items-center p-2 rounded ${
+                  theme === "dark"
+                    ? "text-gray-100 hover:text-gray-200 hover:bg-slate-800"
+                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-200"
+                }`}
+              >
+                <Home className="mr-2" size={20} />
+                Home
+              </NavLink>
+            </li>
+          )}
           <li className="mb-2">
             <NavLink
               to="/inbox"
@@ -96,7 +98,7 @@ const Sidebar = () => {
               Notes
             </NavLink>
           </li>
-          <li className="mb-2">
+          {/* <li className="mb-2">
             <NavLink
               to="/notebooks"
               className={`flex items-center p-2 rounded ${
@@ -109,7 +111,7 @@ const Sidebar = () => {
               <NotebookTabs className="mr-2" size={20} />
               Notebooks
             </NavLink>
-          </li>
+          </li> */}
           <li className="mb-2">
             <NavLink
               to="/trash"
