@@ -57,7 +57,7 @@ export default function Inbox() {
           </div>
         </div>
       </div>
-      <Editor />
+      <Editor cardBoxId={1} />
     </div>
   );
 }
