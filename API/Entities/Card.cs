@@ -6,7 +6,7 @@ public class Card
     public int CardId { get; set; }
     public required string Content { get; set; }
     public required string UserId { get; set; }
-    public int CardBoxId { get; set; }
+    public int? CardBoxId { get; set; }
     public DateTime CreatedAt { get; set; }
 
     // Navigation properties

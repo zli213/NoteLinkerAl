@@ -119,7 +119,7 @@ const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
       const cardData = {
         content: value,
         userId: user?.id || "", // Ensure userId is not undefined
-        cardBoxId: cardBoxId ?? 0, // Provide a default value if cardBoxId is not provided
+        cardBoxId: cardBoxId || null, // Provide a default value if cardBoxId is not provided
         createdAt: new Date().toISOString(),
         tags: tagIds,
       };
@@ -199,6 +199,8 @@ const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
       }
     }
   }, [showTagSelector, value, apiUrl]);
+
+  console.log("Token:", localStorage.getItem("token"));
 
   return (
     <div className="text-editor">

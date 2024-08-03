@@ -1,8 +1,12 @@
 import { useState } from "react";
-import "./CardStack.css"; // 导入自定义 CSS
 
-const CardStack = () => {
-  const [cards, setCards] = useState(["A", "B", "C"]);
+// Define the props type
+interface CardStackProps {
+  initialCards: string[];
+}
+
+const CardStack: React.FC<CardStackProps> = ({ initialCards }) => {
+  const [cards, setCards] = useState(initialCards);
   const [dismissedCard, setDismissedCard] = useState<string | null>(null);
 
   const handleCardClick = (card: string) => {

@@ -52,12 +52,10 @@ export default function Inbox() {
         {/* Card Box */}
         <div className="bg-orange-300 rounded-3xl p-6 pt-10 shadow-lg w-[400px] h-[350px]">
           {/* Dialog Box */}
-          <div className="flex justify-center">
-            <CardStack />
-          </div>
+          <div className="flex justify-center">{/* <CardStack /> */}</div>
         </div>
       </div>
-      <Editor cardBoxId={1} />
+      <Editor />
     </div>
   );
 }

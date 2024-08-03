@@ -79,61 +79,67 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Card>> PostCard(Card card)
         {
-            if (card == null)
-            {
-                _logger.LogWarning("Card data is null.");
-                return BadRequest("Card data is null.");
-            }
+        if (card == null)
+        {
+            _logger.LogWarning("Card data is null.");
+            return BadRequest("Card data is null.");
+        }
 
-            // Get user ID from token
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null)
-            {
-                _logger.LogWarning("User ID is not found in token.");
-                return Unauthorized();
-            }
+        // Get user ID from token
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+        {
+            _logger.LogWarning("User ID is not found in token.");
+            return Unauthorized();
+        }
 
-            // Ensure the provided userId matches the token's userId
-            if (userId != card.UserId)
-            {
-                _logger.LogWarning("User ID mismatch.");
-                return BadRequest("User ID mismatch.");
-            }
+        // Ensure the provided userId matches the token's userId
+        if (userId != card.UserId)
+        {
+            _logger.LogWarning("User ID mismatch.");
+            return BadRequest("User ID mismatch.");
+        }
 
-            // Retrieve the user from the database
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null)
-            {
-                _logger.LogWarning("User not found.");
-                return NotFound("User not found.");
-            }
-
+        // Retrieve the user from the database
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+        {
+            _logger.LogWarning("User not found.");
+            return NotFound("User not found.");
+        }
+        // If CardBoxId is null, assign a default value (e.g., 0 for inbox)
+        CardBox cardBox = null;
+        if (card.CardBoxId.HasValue && card.CardBoxId.Value != 0)
+        {
             // Retrieve the card box from the database
-            var cardBox = await _context.CardBoxes.FindAsync(card.CardBoxId);
+            cardBox = await _context.CardBoxes.FindAsync(card.CardBoxId.Value);
             if (cardBox == null)
             {
                 _logger.LogWarning("Card box not found.");
                 return NotFound("Card box not found.");
             }
+        }
+        else
+        {
+            card.CardBoxId = null; // Set to null if it's 0 or not provided
+        }
+        card.User = user;
+        card.CardBox = cardBox;
 
-            card.User = user;
-            card.CardBox = cardBox;
+        _logger.LogInformation($"Received card: {JsonConvert.SerializeObject(card)}");
+        try
+        {
+            _context.Cards.Add(card);
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Card created successfully.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred: {ex.Message}");
+            return StatusCode(500, "Internal server error");
+        }
 
-            _logger.LogInformation($"Received card: {JsonConvert.SerializeObject(card)}");
-
-            try
-            {
-                _context.Cards.Add(card);
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("Card created successfully.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"An error occurred: {ex.Message}");
-                return StatusCode(500, "Internal server error");
-            }
-
-            return CreatedAtAction(nameof(GetCard), new { id = card.CardId }, card);
+        return CreatedAtAction(nameof(GetCard), new { id = card.CardId }, card);
         }
 
         // DELETE: api/Cards/5
