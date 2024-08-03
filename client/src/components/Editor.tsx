@@ -17,7 +17,6 @@ const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
   const [tagSuggestions, setTagSuggestions] = useState<
     { tagId: number; tagName: string; cardTags: any[] }[]
   >([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
   const quillRef = useRef<any>(null);
 
@@ -31,8 +30,6 @@ const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
         const query = matches[matches.length - 1].slice(1);
         const requestUrl = `${apiUrl}/api/Tag/search?query=${query}`;
         const token = localStorage.getItem("token"); // Assuming you store your token in localStorage
-
-        console.log("Requesting tags from URL:", requestUrl); // Add logging
 
         axios
           .get(requestUrl, {
@@ -52,10 +49,6 @@ const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
       setShowTagSelector(false);
     }
   }, [value, apiUrl]);
-
-  useEffect(() => {
-    console.log("Value updated:", value); // Log the value whenever it changes
-  }, [value]);
 
   const modules = useMemo(
     () => ({
@@ -95,20 +88,43 @@ const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
         setIsLoading(false);
         return;
       }
+
       // Extract tags from content
       const tagReg = /#(\w+)/g;
       const tagMatches = value.match(tagReg) || [];
       const tags = tagMatches.map((tag) => tag.slice(1));
-      console.log("Extracted tags:", tags);
+
+      // Create new tags if they don't exist
+      const createTagPromises = tags.map(async (tag) => {
+        const existingTag = tagSuggestions.find((t) => t.tagName === tag);
+        if (!existingTag) {
+          const response = await axios.post(
+            `${apiUrl}/api/Tag`,
+            { tagName: tag },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          return response.data;
+        }
+        return existingTag;
+      });
+
+      const createdTags = await Promise.all(createTagPromises);
+      const tagIds = createdTags.map((tag) => tag.tagId);
+
       const cardData = {
         content: value,
         userId: user?.id || "", // Ensure userId is not undefined
         cardBoxId: cardBoxId ?? 0, // Provide a default value if cardBoxId is not provided
         createdAt: new Date().toISOString(),
-        tags,
+        tags: tagIds,
       };
 
-      console.log("Sending card data:", cardData);
+      // console.log("Sending card data:", cardData);
 
       const response = await axios.post(`${apiUrl}/api/Cards`, cardData, {
         headers: {
@@ -134,8 +150,6 @@ const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
   };
 
   const handleTagClick = (tagName: string) => {
-    console.log("Tag clicked:", tagName); // Add logging
-
     if (quillRef.current) {
       const editor = quillRef.current.getEditor();
       const range = editor.getSelection();
@@ -168,8 +182,6 @@ const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
         const query = matches[0].slice(1);
         const requestUrl = `${apiUrl}/api/Tag/search?query=${query}`;
         const token = localStorage.getItem("token");
-
-        console.log("Requesting tags from URL:", requestUrl);
 
         axios
           .get(requestUrl, {
