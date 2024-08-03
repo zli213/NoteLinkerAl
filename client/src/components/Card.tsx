@@ -1,4 +1,4 @@
-import { Pencil, Hash, Check, X } from "lucide-react";
+import { Pencil, Hash, X } from "lucide-react";
 import { useState } from "react";
 import DOMPurify from "dompurify";
 import Editor from "./Editor"; // Make sure the path is correct
