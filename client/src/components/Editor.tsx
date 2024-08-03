@@ -11,6 +11,7 @@ interface EditorProps {
   onChange: (value: string) => void;
   cardBoxId?: number;
   cardId?: number;
+  onSend?: () => void;
 }
 
 const Editor: React.FC<EditorProps> = ({
@@ -18,6 +19,7 @@ const Editor: React.FC<EditorProps> = ({
   onChange,
   cardBoxId,
   cardId,
+  onSend,
 }) => {
   const { user, setIsLoading } = useAuth();
   const [showTagSelector, setShowTagSelector] = useState(false);
@@ -133,9 +135,7 @@ const Editor: React.FC<EditorProps> = ({
       };
 
       // console.log("Sending card data:", cardData);
-      console.log("cardId:", cardId);
       if (cardId) {
-        console.log("Updating card...", cardData);
         const response = await axios.put(
           `${apiUrl}/api/Cards/${cardId}`,
           cardData,
@@ -149,6 +149,9 @@ const Editor: React.FC<EditorProps> = ({
         if (response.status === 204) {
           alert("Card updated successfully!");
           onChange(""); // Clear the editor after successful submission
+          if (onSend) {
+            onSend();
+          }
         }
       } else {
         console.log("Creating card...");
@@ -161,6 +164,9 @@ const Editor: React.FC<EditorProps> = ({
         if (response.status === 201) {
           alert("Card created successfully!");
           onChange(""); // Clear the editor after successful submission
+          if (onSend) {
+            onSend();
+          }
         }
       }
     } catch (err) {

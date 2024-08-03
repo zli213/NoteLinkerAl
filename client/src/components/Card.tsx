@@ -58,12 +58,6 @@ const Card: React.FC<CardProps> = ({
               <>
                 <button
                   className="btn btn-ghost btn-xs btn-circle hover:btn-sm"
-                  onClick={handleUpdate}
-                >
-                  <Check size={20} />
-                </button>
-                <button
-                  className="btn btn-ghost btn-xs btn-circle hover:btn-sm"
                   onClick={toggleEditing}
                 >
                   <X size={20} />
@@ -80,7 +74,12 @@ const Card: React.FC<CardProps> = ({
           </div>
         </div>
         {isEditing ? (
-          <Editor value={newContent} onChange={setNewContent} cardId={cardId}/>
+          <Editor
+            value={newContent}
+            onChange={setNewContent}
+            cardId={cardId}
+            onSend={handleUpdate}
+          />
         ) : (
           <div
             className="text-gray-700 mb-2"
