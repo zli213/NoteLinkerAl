@@ -7,11 +7,18 @@ import axios from "axios";
 import { useAuth } from "../store/AuthContext";
 
 interface EditorProps {
+  value: string;
+  onChange: (value: string) => void;
   cardBoxId?: number;
+  cardId?: number;
 }
 
-const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
-  const [value, setValue] = useState<string>("");
+const Editor: React.FC<EditorProps> = ({
+  value,
+  onChange,
+  cardBoxId,
+  cardId,
+}) => {
   const { user, setIsLoading } = useAuth();
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [tagSuggestions, setTagSuggestions] = useState<
@@ -117,6 +124,7 @@ const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
       const tagIds = createdTags.map((tag) => tag.tagId);
 
       const cardData = {
+        cardId: cardId || undefined, // Provide cardId if it exists
         content: value,
         userId: user?.id || "", // Ensure userId is not undefined
         cardBoxId: cardBoxId || null, // Provide a default value if cardBoxId is not provided
@@ -125,20 +133,38 @@ const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
       };
 
       // console.log("Sending card data:", cardData);
-
-      const response = await axios.post(`${apiUrl}/api/Cards`, cardData, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Add Authorization header
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 201) {
-        alert("Card created successfully!");
-        setValue("");
+      console.log("cardId:", cardId);
+      if (cardId) {
+        console.log("Updating card...", cardData);
+        const response = await axios.put(
+          `${apiUrl}/api/Cards/${cardId}`,
+          cardData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add Authorization header
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (response.status === 204) {
+          alert("Card updated successfully!");
+          onChange(""); // Clear the editor after successful submission
+        }
+      } else {
+        console.log("Creating card...");
+        const response = await axios.post(`${apiUrl}/api/Cards`, cardData, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add Authorization header
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.status === 201) {
+          alert("Card created successfully!");
+          onChange(""); // Clear the editor after successful submission
+        }
       }
     } catch (err) {
-      let errorMessage = "Failed to create card. Please try again.";
+      let errorMessage = "Failed to create/update card. Please try again.";
       if (err instanceof Error) {
         errorMessage += ` Error: ${err.message}`;
       }
@@ -200,15 +226,15 @@ const Editor: React.FC<EditorProps> = ({ cardBoxId }) => {
     }
   }, [showTagSelector, value, apiUrl]);
 
-  console.log("Token:", localStorage.getItem("token"));
+  // console.log("Token:", localStorage.getItem("token"));
 
   return (
-    <div className="text-editor">
+    <div className="text-editor w-full">
       <ReactQuill
         ref={quillRef} // Reference to the Quill editor
         theme="snow"
         value={value}
-        onChange={setValue}
+        onChange={onChange}
         modules={modules}
         formats={formats}
       />

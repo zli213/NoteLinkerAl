@@ -1,11 +1,13 @@
 import { Pencil, Hash, Check, X } from "lucide-react";
 import { useState } from "react";
 import DOMPurify from "dompurify";
+import Editor from "./Editor"; // Make sure the path is correct
 
 interface CardProps {
   content: string;
   createdAt: string;
   tags?: string[];
+  cardId?: number;
   onUpdate: (newContent: string) => void;
 }
 
@@ -13,6 +15,7 @@ const Card: React.FC<CardProps> = ({
   content,
   createdAt,
   tags = [],
+  cardId,
   onUpdate,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -36,32 +39,20 @@ const Card: React.FC<CardProps> = ({
 
   const sanitizedContent = DOMPurify.sanitize(highlightTags(content));
 
+  // Format date
+  const formattedDate = new Date(createdAt).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return (
-    <div className="card bg-base-200 w-96 h-96 shadow-xl">
-      <div className="card-body">
-        <p className="text-gray-400 text-sm">{createdAt}</p>
-        {isEditing ? (
-          <textarea
-            className="textarea textarea-bordered w-full"
-            value={newContent}
-            onChange={(e) => setNewContent(e.target.value)}
-            rows={5}
-          />
-        ) : (
-          <div
-            className="text-gray-700"
-            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-          />
-        )}
-        <div className="flex flex-row justify-between items-center">
-          <div className="card-actions justify-start">
-            {tags.map((tag, index) => (
-              <div key={index} className="badge">
-                <Hash size={12} />
-                {tag}
-              </div>
-            ))}
-          </div>
+    <div className="card bg-base-200 w-auto min-w-80 h-auto shadow-xl">
+      <div className="card-body flex flex-col justify-between p-4">
+        <div className="flex flex-row justify-between">
+          <div className="text-gray-400 text-sm mb-2">{formattedDate}</div>
           <div className="card-actions justify-end">
             {isEditing ? (
               <>
@@ -86,6 +77,24 @@ const Card: React.FC<CardProps> = ({
                 <Pencil size={20} />
               </button>
             )}
+          </div>
+        </div>
+        {isEditing ? (
+          <Editor value={newContent} onChange={setNewContent} cardId={cardId}/>
+        ) : (
+          <div
+            className="text-gray-700 mb-2"
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+          />
+        )}
+        <div className="flex flex-row justify-between items-center mt-2">
+          <div className="card-actions justify-start">
+            {tags.map((tag, index) => (
+              <div key={index} className="badge">
+                <Hash size={12} />
+                {tag}
+              </div>
+            ))}
           </div>
         </div>
       </div>

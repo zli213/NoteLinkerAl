@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 interface Card {
-  cardId: number;
+  cardId?: number;
   content: string;
   userId: string;
   cardBoxId: number | null;
@@ -21,12 +21,8 @@ export default function Inbox() {
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
   const [cards, setCards] = useState<Card[]>([]);
-
-  console.log("Rendered Inbox component");
-
+  const [newCardContent, setNewCardContent] = useState("");
   useEffect(() => {
-    console.log("useEffect triggered");
-
     const fetchUserAndCards = async (token: string | null) => {
       if (token) {
         localStorage.setItem("token", token);
@@ -38,7 +34,6 @@ export default function Inbox() {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-          console.log("User response received:", userResponse.data);
           const user = userResponse.data;
           localStorage.setItem("user", JSON.stringify(user));
           setUser(user);
@@ -55,23 +50,19 @@ export default function Inbox() {
       if (user) {
         try {
           const cardsResponse = await axios.get(`${apiUrl}/api/Cards`);
-          console.log("Cards response received:", cardsResponse.data);
           const allCards: Card[] = cardsResponse.data;
-          console.log("All fetched cards:", allCards); // Log all fetched cards
           const inboxCards = allCards.filter(
             (card: Card) => card.cardBoxId === null && card.userId === user.id
           );
-          console.log("Inbox cards:", inboxCards); // Log filtered inbox cards
           setCards(inboxCards);
         } catch (err) {
           console.error("Failed to fetch cards:", err);
         }
       } else {
-        console.log("No token found and user not logged in");
         navigate("/");
       }
     };
-
+    setNewCardContent("");
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     fetchUserAndCards(token);
@@ -97,7 +88,9 @@ export default function Inbox() {
           </div>
         </div>
       </div>
-      <Editor />
+      <div className="w-2/3">
+        <Editor value={newCardContent} onChange={setNewCardContent} />
+      </div>
     </div>
   );
 }

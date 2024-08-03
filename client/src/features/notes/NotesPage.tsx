@@ -40,14 +40,15 @@ export default function NotesPage() {
   return (
     <div className="flex flex-col h-screen">
       <h1 className="text-4xl font-bold mb-8 ml-8 mt-3">Notes</h1>
-      <div className="flex-grow overflow-y-auto px-8 pb-8">
-        <div className="grid grid-cols-3 gap-3">
+      <div className="flex-grow overflow-y-auto px-8 pb-8 justify-center">
+        <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-1 sm:gap-2 lg:gap-3">
           {cards.map((card) => (
             <Card
               key={card.cardId}
               content={card.content}
               createdAt={card.createdAt}
               tags={card.tags}
+              cardId={card.cardId}
               onUpdate={(newContent) => {
                 // Update the card content in the state
                 setCards((prevCards) =>
