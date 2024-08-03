@@ -95,7 +95,21 @@ namespace API.Controllers
 
             return NoContent();
         }
+        // GET: api/Tags/search?query=example
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<Tag>>> SearchTags(string query)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                return BadRequest("Query parameter is required.");
+            }
 
+            var tags = await _context.Tags
+                .Where(t => t.TagName.Contains(query))
+                .ToListAsync();
+
+            return tags;
+        }
         private bool TagExists(int id)
         {
             return _context.Tags.Any(e => e.TagId == id);

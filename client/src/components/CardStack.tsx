@@ -1,15 +1,35 @@
-import { useState } from "react";
-import "./CardStack.css"; // 导入自定义 CSS
+import { useState, useEffect } from "react";
+import Card from "./Card";
+import DOMPurify from "dompurify";
 
-const CardStack = () => {
-  const [cards, setCards] = useState(["A", "B", "C"]);
-  const [dismissedCard, setDismissedCard] = useState<string | null>(null);
+interface Card {
+  cardId: number;
+  content: string;
+  userId: string;
+  cardBoxId: number | null;
+  createdAt: string;
+  tags: string[];
+}
 
-  const handleCardClick = (card: string) => {
+interface CardStackProps {
+  initialCards: Card[];
+}
+
+const CardStack: React.FC<CardStackProps> = ({ initialCards }) => {
+  const [cards, setCards] = useState<Card[]>(initialCards);
+  const [dismissedCard, setDismissedCard] = useState<Card | null>(null);
+
+  useEffect(() => {
+    setCards(initialCards);
+  }, [initialCards]);
+
+  const handleCardClick = (card: Card) => {
     setDismissedCard(card);
 
     setTimeout(() => {
-      setCards((prevCards) => prevCards.filter((c) => c !== card));
+      setCards((prevCards) =>
+        prevCards.filter((c) => c.cardId !== card.cardId)
+      );
       setDismissedCard(null);
     }, 600);
   };
@@ -25,8 +45,18 @@ const CardStack = () => {
             }`}
             onClick={() => handleCardClick(card)}
           >
-            <div className="card-body">{card}</div>
-            {/* Edit and Sort Buttons */}
+            {/* <div
+              className="card-body"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(card.content),
+              }}
+            /> */}
+            <Card
+              content={card.content}
+              createdAt={card.createdAt}
+              tags={card.tags}
+              onUpdate={() => {}}
+            />
             <div className="flex justify-center mt-4">
               <button className="bg-blue-400 text-white px-4 py-1 rounded-l-full text-sm">
                 Edit
