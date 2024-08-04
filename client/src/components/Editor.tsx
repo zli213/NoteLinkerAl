@@ -30,7 +30,7 @@ const Editor: React.FC<EditorProps> = ({
   const quillRef = useRef<any>(null);
 
   useEffect(() => {
-    if (value.includes("#")) {
+    if (value && value.includes("#")) {
       setShowTagSelector(true);
       // Fetch tag suggestions from the API
       const tagReg = /#(\w+)/g;
@@ -207,7 +207,7 @@ const Editor: React.FC<EditorProps> = ({
   };
 
   useEffect(() => {
-    if (showTagSelector) {
+    if (showTagSelector && value) {
       const tagReg = /#(\w+)$/;
       const matches = value.match(tagReg);
       if (matches) {
@@ -232,12 +232,40 @@ const Editor: React.FC<EditorProps> = ({
     }
   }, [showTagSelector, value, apiUrl]);
 
-  const handleRewrite = async () => {};
+  const handleRewrite = async () => {
+    // Construct the prompt with instructions
+    const instructions = `
+    Please rewrite the following note content to conform to the ReactQuill format. 
+    - <b> for bold text
+    - <i> for italic text
+    - <u> for underlined text
+    - <s> for strikethrough text
+    - <blockquote> for block quotes
+    - <ol> and <li> for ordered lists
+    - <ul> and <li> for unordered lists
+    - <p class="ql-indent-1"> for indented text
+    - <a> for links
+    - # for tags, which shoule be less than 5 tags in a note
+    Please consider add some relevant tags to the note content. 
+    If the original text is too long, summarize and shorten it(less than 200 words).
+    Only return the rewritten content without any additional explanation.
+    Do not include any enclosing \`\`\`html or \`\`\` tags around the result.
+
+    Here is the current note content:
+  `;
+    const promptValue = instructions + "\n\n" + value;
+    //  Get the return value of api/Card/openai/rewrite
+    const response = await axios.post(`${apiUrl}/api/Cards/openai/rewrite`, {
+      prompt: promptValue,
+    });
+    const rewrittenText = response.data.value.choices[0].message.content;
+    onChange(rewrittenText);
+  };
 
   // console.log("Token:", localStorage.getItem("token"));
 
   return (
-    <div className="flex flex-col border border-gray-300 shadow-md rounded-lg w-full min-w-[450px]">
+    <div className="flex flex-col border border-gray-300 shadow-md rounded-lg w-full min-w-[350px]">
       <ReactQuill
         ref={quillRef}
         theme="snow"
@@ -262,7 +290,7 @@ const Editor: React.FC<EditorProps> = ({
       )}
       <div
         id="toolbar"
-        className="flex flex-wrap items-center p-2 justify-between"
+        className="flex flex-wrap items-center p-2 justify-around"
       >
         <button className="ql-bold"></button>
         <button className="ql-italic"></button>
@@ -279,7 +307,7 @@ const Editor: React.FC<EditorProps> = ({
         <button onClick={handleRewrite}>
           <Bot />
         </button>
-        <button className="btn btn-xs" onClick={handleSend}>
+        <button onClick={handleSend}>
           <Send />
         </button>
       </div>
