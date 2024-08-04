@@ -5,6 +5,7 @@ import Editor from "../../components/Editor";
 import { useAuth } from "../../store/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useTheme } from "../../components/ThemeContext";
 
 interface Card {
   cardId: number;
@@ -22,6 +23,7 @@ export default function Inbox() {
   const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
   const [cards, setCards] = useState<Card[]>([]);
   const [newCardContent, setNewCardContent] = useState("");
+  const { theme } = useTheme();
   useEffect(() => {
     const fetchUserAndCards = async (token: string | null) => {
       if (token) {
@@ -77,8 +79,12 @@ export default function Inbox() {
   ]);
 
   return (
-    <div className="flex flex-col justify-around items-center h-screen flex-grow">
-      <TimeLine />
+    <div
+      className={`flex flex-col justify-around items-center h-screen flex-grow ${
+        theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+      }`}
+    >
+      {/* <TimeLine /> */}
       <div className="mb-8">
         {/* Card Box */}
         <div className="bg-orange-300 rounded-3xl p-6 pt-10 shadow-lg w-[500px] h-[350px]">

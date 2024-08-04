@@ -3,6 +3,9 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      height: {
+        95: "95%",
+      },
       screens: {
         xl: "1030px", // Custom breakpoint for 1030px
         "2xl": "1430px", // Custom breakpoint for 1430px
@@ -14,6 +17,7 @@ export default {
   },
   plugins: [require("daisyui")],
   daisyui: {
-    themes: ["light", "dark", "synthwave"],
+    themes: ["light", "dark"],
   },
+  darkMode: ["class", '[data-theme="dark"]'],
 };

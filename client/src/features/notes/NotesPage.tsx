@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import Card from "../../components/Card";
 import { useAuth } from "../../store/AuthContext";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // Make sure to install axios: npm install axios
+import axios from "axios";
+import { useTheme } from "../../components/ThemeContext";
 
 interface Card {
   cardId: number;
@@ -18,6 +19,7 @@ export default function NotesPage() {
   const navigate = useNavigate();
   const [cards, setCards] = useState<Card[]>([]);
   const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -45,7 +47,11 @@ export default function NotesPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div
+      className={`flex flex-col h-screen ${
+        theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+      }`}
+    >
       <h1 className="text-4xl font-bold mb-8 ml-8 mt-3">Notes</h1>
       <div className="flex-grow overflow-y-auto px-8 pb-8 justify-center">
         <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-1 sm:gap-2 lg:gap-3">
