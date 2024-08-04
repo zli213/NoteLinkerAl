@@ -3,6 +3,7 @@ import Card from "../../components/Card";
 import { useAuth } from "../../store/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios"; // Make sure to install axios: npm install axios
+
 interface Card {
   cardId: number;
   content: string;
@@ -11,11 +12,13 @@ interface Card {
   createdAt: string;
   tags: string[];
 }
+
 export default function NotesPage() {
   const { isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
   const [cards, setCards] = useState<Card[]>([]);
   const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
+
   useEffect(() => {
     if (!isLoggedIn) {
       navigate("/");
@@ -35,6 +38,10 @@ export default function NotesPage() {
     } catch (error) {
       console.error("Failed to fetch user cards:", error);
     }
+  };
+
+  const handleDeleteCard = (cardId: number) => {
+    setCards((prevCards) => prevCards.filter((card) => card.cardId !== cardId));
   };
 
   return (
@@ -57,6 +64,7 @@ export default function NotesPage() {
                   )
                 );
               }}
+              onDelete={handleDeleteCard} // Pass the delete handler as a prop
             />
           ))}
         </div>
