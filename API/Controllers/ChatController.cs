@@ -31,7 +31,7 @@ namespace API.Controllers
         [HttpPost("openai/chat")]
         public async IAsyncEnumerable<ChatChunkResponse> PostChatPromptAsync([FromBody] PromptRequest prompt, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            var deploymentId = _config["AZURE_OPENAI_CHATGPT_DEPLOYMENT"];
+            var deploymentId = _config["AzureOpenAI:ChatGPTDeploymentId"];
             var response = await _client.GetChatCompletionsStreamingAsync(
                 new ChatCompletionsOptions
                 {

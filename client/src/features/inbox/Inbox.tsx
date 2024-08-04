@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 interface Card {
-  cardId?: number;
+  cardId: number;
   content: string;
   userId: string;
   cardBoxId: number | null;
@@ -81,7 +81,7 @@ export default function Inbox() {
       <TimeLine />
       <div className="mb-8">
         {/* Card Box */}
-        <div className="bg-orange-300 rounded-3xl p-6 pt-10 shadow-lg w-[400px] h-[350px]">
+        <div className="bg-orange-300 rounded-3xl p-6 pt-10 shadow-lg w-[500px] h-[350px]">
           {/* Dialog Box */}
           <div className="flex justify-center">
             <CardStack initialCards={cards} />

@@ -1,8 +1,10 @@
 using API.Data;
 using API.Entities;
+using Azure.AI.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Shared.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -16,11 +18,15 @@ namespace API.Controllers
     {
         private readonly NotesAppContext _context;
         private readonly ILogger<AccountController> _logger;
+        private readonly OpenAIClient _client;
+        private readonly IConfiguration _config;
 
-        public CardsController(NotesAppContext context, ILogger<AccountController> logger)
+        public CardsController(NotesAppContext context, ILogger<AccountController> logger, OpenAIClient client, IConfiguration config)
         {
             _context = context;
             _logger = logger;
+            _client = client;
+            _config = config;
         }
 
         // GET: api/Cards
@@ -156,6 +162,26 @@ namespace API.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+        // Add a new route to the ChatController that will help using the openAI API to rewrite the note card.
+        // POST api/Cards/openai/rewrite
+        [HttpPost("openai/rewrite")]
+        public async Task<IActionResult> PostRewritePromptAsync([FromBody] PromptRequest prompt, CancellationToken cancellationToken)
+        {
+            var deploymentId = _config["AzureOpenAI:ChatGPTDeploymentId"];
+            var response = await _client.GetChatCompletionsAsync(
+                new ChatCompletionsOptions
+                {
+                    DeploymentName = deploymentId,
+                    Messages =
+                    {
+                        new ChatRequestSystemMessage("You're an AI assistant for learner, helping them rewrite notes more efficiently."),
+                        new ChatRequestUserMessage("Can you rewrite this note card?"),
+                        new ChatRequestUserMessage(prompt.Prompt),
+                    },
+                }, cancellationToken);
+
+            return Ok(response);
         }
 
         private bool CardExists(int id)

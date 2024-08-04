@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import "./Editor.css";
-import { Send } from "lucide-react";
+// import "./Editor.css";
+import { Send, Bot } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../store/AuthContext";
 
@@ -30,7 +30,7 @@ const Editor: React.FC<EditorProps> = ({
   const quillRef = useRef<any>(null);
 
   useEffect(() => {
-    if (value.includes("#")) {
+    if (value && value.includes("#")) {
       setShowTagSelector(true);
       // Fetch tag suggestions from the API
       const tagReg = /#(\w+)/g;
@@ -207,7 +207,7 @@ const Editor: React.FC<EditorProps> = ({
   };
 
   useEffect(() => {
-    if (showTagSelector) {
+    if (showTagSelector && value) {
       const tagReg = /#(\w+)$/;
       const matches = value.match(tagReg);
       if (matches) {
@@ -232,47 +232,82 @@ const Editor: React.FC<EditorProps> = ({
     }
   }, [showTagSelector, value, apiUrl]);
 
+  const handleRewrite = async () => {
+    // Construct the prompt with instructions
+    const instructions = `
+    Please rewrite the following note content to conform to the ReactQuill format. 
+    - <b> for bold text
+    - <i> for italic text
+    - <u> for underlined text
+    - <s> for strikethrough text
+    - <blockquote> for block quotes
+    - <ol> and <li> for ordered lists
+    - <ul> and <li> for unordered lists
+    - <p class="ql-indent-1"> for indented text
+    - <a> for links
+    - # for tags, which shoule be less than 5 tags in a note
+    Please consider add some relevant tags to the note content. 
+    If the original text is too long, summarize and shorten it(less than 200 words).
+    Only return the rewritten content without any additional explanation.
+    Do not include any enclosing \`\`\`html or \`\`\` tags around the result.
+
+    Here is the current note content:
+  `;
+    const promptValue = instructions + "\n\n" + value;
+    //  Get the return value of api/Card/openai/rewrite
+    const response = await axios.post(`${apiUrl}/api/Cards/openai/rewrite`, {
+      prompt: promptValue,
+    });
+    const rewrittenText = response.data.value.choices[0].message.content;
+    onChange(rewrittenText);
+  };
+
   // console.log("Token:", localStorage.getItem("token"));
 
   return (
-    <div className="text-editor w-full">
+    <div className="flex flex-col border border-gray-300 shadow-md rounded-lg w-full min-w-[350px]">
       <ReactQuill
-        ref={quillRef} // Reference to the Quill editor
+        ref={quillRef}
         theme="snow"
         value={value}
         onChange={onChange}
         modules={modules}
         formats={formats}
+        className="h-28"
       />
       {showTagSelector && (
-        <div className="tag-selector flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap gap-2 mt-2 p-2">
           {tagSuggestions.map((tag) => (
             <button
               key={tag.tagId}
               onClick={() => handleTagClick(tag.tagName)}
-              className="tag-button bg-gray-200 border border-gray-400 rounded px-2 py-1 cursor-pointer transition-colors duration-300 hover:bg-gray-300"
+              className="bg-gray-200 border border-gray-400 rounded px-2 py-1 cursor-pointer transition-colors duration-300 hover:bg-gray-300"
             >
               {tag.tagName}
             </button>
           ))}
         </div>
       )}
-      <div id="toolbar" className="toolbar">
-        <div>
-          <button className="ql-bold"></button>
-          <button className="ql-italic"></button>
-          <button className="ql-underline"></button>
-          <button className="ql-strike"></button>
-          <button className="ql-blockquote"></button>
-          <button className="ql-list" value="ordered"></button>
-          <button className="ql-list" value="bullet"></button>
-          <button className="ql-indent" value="-1"></button>
-          <button className="ql-indent" value="+1"></button>
-          <button className="ql-link"></button>
-          <button className="ql-image"></button>
-          <button className="ql-clean"></button>
-        </div>
-        <button className="btn btn-xs" onClick={handleSend}>
+      <div
+        id="toolbar"
+        className="flex flex-wrap items-center p-2 justify-around"
+      >
+        <button className="ql-bold"></button>
+        <button className="ql-italic"></button>
+        <button className="ql-underline"></button>
+        <button className="ql-strike"></button>
+        <button className="ql-blockquote"></button>
+        <button className="ql-list" value="ordered"></button>
+        <button className="ql-list" value="bullet"></button>
+        <button className="ql-indent" value="-1"></button>
+        <button className="ql-indent" value="+1"></button>
+        <button className="ql-link"></button>
+        <button className="ql-image"></button>
+        <button className="ql-clean"></button>
+        <button onClick={handleRewrite}>
+          <Bot />
+        </button>
+        <button onClick={handleSend}>
           <Send />
         </button>
       </div>

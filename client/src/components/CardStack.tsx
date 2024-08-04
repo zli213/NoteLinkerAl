@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import Card from "./Card";
-import DOMPurify from "dompurify";
-
 interface Card {
   cardId: number;
   content: string;
@@ -45,12 +43,6 @@ const CardStack: React.FC<CardStackProps> = ({ initialCards }) => {
             }`}
             onClick={() => handleCardClick(card)}
           >
-            {/* <div
-              className="card-body"
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(card.content),
-              }}
-            /> */}
             <Card
               content={card.content}
               createdAt={card.createdAt}

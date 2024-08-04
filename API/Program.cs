@@ -17,7 +17,6 @@ using Azure.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 // Configure logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -129,33 +128,51 @@ builder.Services.AddAuthorization(options =>
 
 // Read configuration file
 var configuration = builder.Configuration;
-string endpoint = configuration["AzureOpenAI:Endpoint"] ?? throw new ArgumentNullException(nameof(endpoint), "AzureOpenAI:Endpoint configuration is missing or empty.");
-string key = configuration["AzureOpenAI:Key"] ?? throw new ArgumentNullException(nameof(key), "AzureOpenAI:Key configuration is missing or empty.");
-string visionEndpoint = configuration["AzureComputerVision:Endpoint"] ?? throw new ArgumentNullException(nameof(visionEndpoint), "AzureComputerVision:Endpoint configuration is missing or empty.");
-string visionApiKey = configuration["AzureComputerVision:ApiKey"] ?? throw new ArgumentNullException(nameof(visionApiKey), "AzureComputerVision:ApiKey configuration is missing or empty.");
+string endpoint = configuration["AzureOpenAI:Endpoint"];
+string key = configuration["AzureOpenAI:Key"];
+// string visionEndpoint = configuration["AzureComputerVision:Endpoint"];
+// string visionApiKey = configuration["AzureComputerVision:ApiKey"];
+
+if (string.IsNullOrEmpty(endpoint))
+{
+    throw new ArgumentNullException(nameof(endpoint), "AzureOpenAI:Endpoint configuration is missing or empty.");
+}
+if (string.IsNullOrEmpty(key))
+{
+    throw new ArgumentNullException(nameof(key), "AzureOpenAI:Key configuration is missing or empty.");
+}
+// if (string.IsNullOrEmpty(visionEndpoint))
+// {
+//     throw new ArgumentNullException(nameof(visionEndpoint), "AzureComputerVision:Endpoint configuration is missing or empty.");
+// }
+// if (string.IsNullOrEmpty(visionApiKey))
+// {
+//     throw new ArgumentNullException(nameof(visionApiKey), "AzureComputerVision:ApiKey configuration is missing or empty.");
+// }
 
 // Inject OpenAI services
 builder.Services.AddSingleton<IConfiguration>(configuration);
-builder.Services.AddSingleton<ISearchService, AzureSearchService>();
-builder.Services.AddSingleton<IComputerVisionService>(sp =>
-{
-    var httpClient = sp.GetRequiredService<HttpClient>();
-    return new AzureComputerVisionService(httpClient, visionEndpoint, visionApiKey);
-});
-builder.Services.AddHttpClient(); // 添加 HttpClient 配置
-builder.Services.AddSingleton<SearchClient>(sp =>
-{
-    var config = sp.GetRequiredService<IConfiguration>();
-    var searchEndpoint = new Uri(config["AzureSearch:Endpoint"]);
-    var searchApiKey = new AzureKeyCredential(config["AzureSearch:ApiKey"]);
-    return new SearchClient(searchEndpoint, "indexName", searchApiKey); // 请替换 "indexName" 为实际的索引名称
-});
+// builder.Services.AddSingleton<ISearchService, AzureSearchService>();
+// builder.Services.AddSingleton<IComputerVisionService>(sp =>
+// {
+//     var httpClient = sp.GetRequiredService<HttpClient>();
+//     return new AzureComputerVisionService(httpClient, visionEndpoint, visionApiKey);
+// });
+builder.Services.AddHttpClient();
+// builder.Services.AddSingleton<SearchClient>(sp =>
+// {
+//     var config = sp.GetRequiredService<IConfiguration>();
+//     var searchEndpoint = new Uri(config["AzureSearch:Endpoint"]);
+//     var searchApiKey = new AzureKeyCredential(config["AzureSearch:ApiKey"]);
+//     return new SearchClient(searchEndpoint, "indexName", searchApiKey);
+// });
 builder.Services.AddSingleton<OpenAIClient>(sp =>
 {
     return new OpenAIClient(new Uri(endpoint), new AzureKeyCredential(key));
 });
-builder.Services.AddTransient<ReadRetrieveReadChatService>();
+// builder.Services.AddTransient<ReadRetrieveReadChatService>();
 builder.Services.AddScoped<TokenService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
