@@ -117,6 +117,26 @@ namespace API.Controllers
             var response = new ImageResponse(result.Value.Created, imageUrls);
             return Ok(response);
         }
+        // Add a new route to the ChatController that will help using the openAI API to rewrite the note card.
+        // POST api/chat/openai/rewrite
+        [HttpPost("openai/rewrite")]
+        public async Task<IActionResult> PostRewritePromptAsync([FromBody] PromptRequest prompt, CancellationToken cancellationToken)
+        {
+            var deploymentId = _config["AZURE_OPENAI_CHATGPT_DEPLOYMENT"];
+            var response = await _client.GetChatCompletionsAsync(
+                new ChatCompletionsOptions
+                {
+                    DeploymentName = deploymentId,
+                    Messages =
+                    {
+                        new ChatRequestSystemMessage("You're an AI assistant for learner, helping them rewrite notes more efficiently."),
+                        new ChatRequestUserMessage("Can you rewrite this note card?"),
+                        new ChatRequestAssistantMessage(prompt.Prompt)
+                    }
+                }, cancellationToken);
+
+            return Ok(response);
+        }
 
     }
 }

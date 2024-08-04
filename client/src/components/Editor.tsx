@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import "./Editor.css";
-import { Send } from "lucide-react";
+// import "./Editor.css";
+import { Send, Bot } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../store/AuthContext";
 
@@ -232,46 +232,53 @@ const Editor: React.FC<EditorProps> = ({
     }
   }, [showTagSelector, value, apiUrl]);
 
+  const handleRewrite = async () => {};
+
   // console.log("Token:", localStorage.getItem("token"));
 
   return (
-    <div className="text-editor w-full">
+    <div className="flex flex-col border border-gray-300 shadow-md rounded-lg w-full min-w-[450px]">
       <ReactQuill
-        ref={quillRef} // Reference to the Quill editor
+        ref={quillRef}
         theme="snow"
         value={value}
         onChange={onChange}
         modules={modules}
         formats={formats}
+        className="h-28"
       />
       {showTagSelector && (
-        <div className="tag-selector flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap gap-2 mt-2 p-2">
           {tagSuggestions.map((tag) => (
             <button
               key={tag.tagId}
               onClick={() => handleTagClick(tag.tagName)}
-              className="tag-button bg-gray-200 border border-gray-400 rounded px-2 py-1 cursor-pointer transition-colors duration-300 hover:bg-gray-300"
+              className="bg-gray-200 border border-gray-400 rounded px-2 py-1 cursor-pointer transition-colors duration-300 hover:bg-gray-300"
             >
               {tag.tagName}
             </button>
           ))}
         </div>
       )}
-      <div id="toolbar" className="toolbar">
-        <div>
-          <button className="ql-bold"></button>
-          <button className="ql-italic"></button>
-          <button className="ql-underline"></button>
-          <button className="ql-strike"></button>
-          <button className="ql-blockquote"></button>
-          <button className="ql-list" value="ordered"></button>
-          <button className="ql-list" value="bullet"></button>
-          <button className="ql-indent" value="-1"></button>
-          <button className="ql-indent" value="+1"></button>
-          <button className="ql-link"></button>
-          <button className="ql-image"></button>
-          <button className="ql-clean"></button>
-        </div>
+      <div
+        id="toolbar"
+        className="flex flex-wrap items-center p-2 justify-between"
+      >
+        <button className="ql-bold"></button>
+        <button className="ql-italic"></button>
+        <button className="ql-underline"></button>
+        <button className="ql-strike"></button>
+        <button className="ql-blockquote"></button>
+        <button className="ql-list" value="ordered"></button>
+        <button className="ql-list" value="bullet"></button>
+        <button className="ql-indent" value="-1"></button>
+        <button className="ql-indent" value="+1"></button>
+        <button className="ql-link"></button>
+        <button className="ql-image"></button>
+        <button className="ql-clean"></button>
+        <button onClick={handleRewrite}>
+          <Bot />
+        </button>
         <button className="btn btn-xs" onClick={handleSend}>
           <Send />
         </button>
