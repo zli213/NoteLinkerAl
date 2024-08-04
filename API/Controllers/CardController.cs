@@ -155,12 +155,14 @@ namespace API.Controllers
             var card = await _context.Cards.FindAsync(id);
             if (card == null)
             {
+                _logger.LogWarning("Card with id {CardId} not found", id);
                 return NotFound();
             }
 
             _context.Cards.Remove(card);
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Card with id {CardId} successfully deleted", id);
             return NoContent();
         }
         // Add a new route to the ChatController that will help using the openAI API to rewrite the note card.

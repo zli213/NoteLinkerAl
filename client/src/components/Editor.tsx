@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-// import "./Editor.css";
 import { Send, Bot } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../store/AuthContext";
@@ -134,7 +133,6 @@ const Editor: React.FC<EditorProps> = ({
         tags: tagIds,
       };
 
-      // console.log("Sending card data:", cardData);
       if (cardId) {
         const response = await axios.put(
           `${apiUrl}/api/Cards/${cardId}`,
@@ -262,7 +260,7 @@ const Editor: React.FC<EditorProps> = ({
     onChange(rewrittenText);
   };
 
-  // console.log("Token:", localStorage.getItem("token"));
+  console.log("Token:", localStorage.getItem("token"));
 
   return (
     <div className="flex flex-col border border-gray-300 shadow-md rounded-lg w-full min-w-[350px]">
