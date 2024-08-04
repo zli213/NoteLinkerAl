@@ -152,7 +152,6 @@ const Editor: React.FC<EditorProps> = ({
           }
         }
       } else {
-        console.log("Creating card...");
         const response = await axios.post(`${apiUrl}/api/Cards`, cardData, {
           headers: {
             Authorization: `Bearer ${token}`, // Add Authorization header
@@ -259,8 +258,6 @@ const Editor: React.FC<EditorProps> = ({
     const rewrittenText = response.data.value.choices[0].message.content;
     onChange(rewrittenText);
   };
-
-  console.log("Token:", localStorage.getItem("token"));
 
   return (
     <div className="flex flex-col border border-gray-300 shadow-md rounded-lg w-full min-w-[350px]">
