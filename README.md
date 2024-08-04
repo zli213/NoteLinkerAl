@@ -139,12 +139,12 @@ The application requires several configurations for logging, authentication, dat
     "Endpoint": "https://your-openai-endpoint/",
     "Key": "your-openai-key",
     "ChatGPTDeploymentId": "your-deployment-id"
-  },
+  },[not available]
   "AzureComputerVision": {
     "Endpoint": "your-computervision-endpoint",
     "ApiKey": "your-computervision-api-key"
-  },
-  "CitationBaseUrl": "your-citation-base-url",
+  },[not available]
+  "CitationBaseUrl": "your-citation-base-url",[not available]
   "AllowedHosts": "*"
 }
 ```
