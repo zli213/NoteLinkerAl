@@ -5,6 +5,7 @@ export default {
     extend: {
       height: {
         95: "95%",
+        98: "98%",
       },
       screens: {
         xl: "1030px", // Custom breakpoint for 1030px
