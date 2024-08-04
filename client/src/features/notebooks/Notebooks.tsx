@@ -4,12 +4,14 @@ import { UploadFile } from "../../components/UploadFIle";
 import Chat from "../../components/Chat";
 import { useAuth } from "../../store/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../../components/ThemeContext";
 
 const Notebooks = () => {
   const [showDocument, setShowDocument] = useState(true);
   const [showSupportingContent, setShowSupportingContent] = useState(false);
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -28,7 +30,11 @@ const Notebooks = () => {
   };
 
   return (
-    <div className="flex flex-row">
+    <div
+      className={`flex flex-row ${
+        theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+      }`}
+    >
       <div className="flex flex-col w-3/4">
         <div role="tablist" className="tabs tabs-boxed">
           <button role="tab" className="tab" onClick={handleDocumentClick}>
